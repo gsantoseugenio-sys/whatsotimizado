@@ -143,7 +143,9 @@
   right: 58px;
   top: 50%;
   bottom: auto;
+  left: auto;
   transform: translateY(-50%);
+  max-height: calc(100vh - 24px);
 }
 
 .wa-ai-panel[hidden] {

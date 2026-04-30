@@ -2970,7 +2970,9 @@
       state.root.style.left = "";
     }
     if (state.panel) {
-      state.panel.style.top = `${Math.min(80, Math.max(20, topPercent))}%`;
+      state.panel.style.top = "";
+      state.panel.style.left = "";
+      state.panel.style.right = "";
     }
   }
 
