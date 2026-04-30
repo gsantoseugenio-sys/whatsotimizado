@@ -35,6 +35,84 @@ const FORMALITY_INSTRUCTIONS = {
 };
 
 const OBJECTIVE_STYLE_GUIDES = {
+  better_text: {
+    label: "Melhor texto",
+    objective: "Aperfeicoar o texto para ficar mais claro, natural, humano e pronto para envio.",
+    characteristics: [
+      "Preserve exatamente o sentido original.",
+      "Corrija gramatica, fluidez e clareza sem inventar informacoes.",
+      "Mantenha tamanho parecido com o texto original.",
+      "Use linguagem natural, sem tom robotico ou formalidade artificial.",
+      "Deixe a mensagem pronta para conversa real em WhatsApp, Gmail ou redes sociais."
+    ],
+    vocabulary: ["claro", "natural", "direto", "humano", "fluido"],
+    tone: "natural, claro e humano"
+  },
+  summary: {
+    label: "Resumo",
+    objective: "Transformar o texto em um resumo claro, curto e fiel ao conteudo original.",
+    characteristics: [
+      "Reduza o texto ao essencial.",
+      "Preserve fatos, nomes, numeros, datas, valores e intencao.",
+      "Nao adicione opinioes, conclusoes ou informacoes novas.",
+      "Use frases diretas e faceis de ler.",
+      "Se o texto ja for curto, deixe ainda mais objetivo sem perder sentido."
+    ],
+    vocabulary: ["em resumo", "ponto principal", "essencial", "objetivo", "claro"],
+    tone: "claro, objetivo e neutro"
+  },
+  email: {
+    label: "Email",
+    objective: "Adaptar o texto para formato de email claro, educado e pronto para envio.",
+    characteristics: [
+      "Organize a mensagem com abertura, corpo e fechamento quando fizer sentido.",
+      "Mantenha tom profissional e natural.",
+      "Nao crie anexos, promessas, datas, cargos ou informacoes que nao existam no texto original.",
+      "Deixe o pedido ou mensagem principal facil de entender.",
+      "Evite formalidade excessiva."
+    ],
+    vocabulary: ["ola", "segue", "poderia", "obrigado", "atenciosamente"],
+    tone: "educado, profissional e natural"
+  },
+  research: {
+    label: "Pesquisa",
+    objective: "Transformar o texto em uma solicitacao de pesquisa clara, estruturada e util.",
+    characteristics: [
+      "Organize o que precisa ser pesquisado.",
+      "Crie uma pergunta ou briefing objetivo quando fizer sentido.",
+      "Nao afirme resultados de pesquisa que nao estejam no texto original.",
+      "Destaque contexto, objetivo e criterio de busca.",
+      "Use linguagem clara para orientar uma investigacao posterior."
+    ],
+    vocabulary: ["pesquisar", "analisar", "levantar", "comparar", "criterios", "fontes", "contexto"],
+    tone: "analitico, claro e investigativo"
+  },
+  translate: {
+    label: "Traduzir",
+    objective: "Traduzir o texto para o idioma solicitado preservando sentido, naturalidade e informacoes originais.",
+    characteristics: [
+      "Traduza fielmente, sem responder nem melhorar o conteudo alem do necessario.",
+      "Preserve nomes, numeros, datas, valores, links e emojis.",
+      "Mantenha o nivel de formalidade original sempre que possivel.",
+      "Nao resuma e nao expanda.",
+      "Se o idioma solicitado for o mesmo do texto, apenas deixe a frase natural."
+    ],
+    vocabulary: ["traducao fiel", "sentido original", "naturalidade", "idioma solicitado"],
+    tone: "fiel, natural e neutro"
+  },
+  study: {
+    label: "Estudo",
+    objective: "Transformar o texto em explicacao de estudo clara, didatica e facil de entender.",
+    characteristics: [
+      "Explique o conteudo de forma organizada.",
+      "Use linguagem didatica e objetiva.",
+      "Pode criar estrutura em topicos curtos se ajudar, sem usar markdown pesado.",
+      "Nao invente dados ou conceitos ausentes.",
+      "Priorize compreensao e memorizacao."
+    ],
+    vocabulary: ["conceito", "explicacao", "exemplo", "ponto principal", "aprendizado", "entender"],
+    tone: "didatico, claro e paciente"
+  },
   business_ceo: {
     label: "CEO / Empresario",
     objective: "Transmitir visao estrategica, autoridade, clareza e tomada de decisao.",

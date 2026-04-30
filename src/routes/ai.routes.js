@@ -1,8 +1,12 @@
 import { Router } from "express";
 import { z } from "zod";
 import { getEffectivePlanIdForUser } from "../config/plans.js";
-import { classifyMessage, improveText } from "../services/text-intelligence/index.js";
-import { checkUsageLimit, toPublicUsage } from "../services/usage/check-usage-limit.js";
+import { classifyMessage, improveText, translateText } from "../services/text-intelligence/index.js";
+import {
+  checkUsageLimit,
+  toPublicUsage,
+  TRANSLATE_RECEIVED_ACTION
+} from "../services/usage/check-usage-limit.js";
 import { getAdaptivePreferences } from "../services/learning/index.js";
 import { registerUsage } from "../services/usage/register-usage.js";
 
@@ -59,6 +63,18 @@ const improveTextSchema = z.object({
   userPreferences: userPreferencesSchema
 });
 
+const translateTextSchema = z.object({
+  text: z.string().trim().min(1).max(2500),
+  metadata: metadataSchema,
+  userPreferences: z
+    .object({
+      targetLanguage: z.enum(["auto", "pt-BR", "en", "hi", "id", "es"]).default("pt-BR"),
+      allowLearning: z.boolean().default(false),
+      allowTextStorage: z.boolean().default(false)
+    })
+    .default({})
+});
+
 function getAnonymousId(req) {
   const anonymousId = String(req.header("x-anonymous-id") || "").trim();
   if (!/^[a-zA-Z0-9_-]{16,128}$/.test(anonymousId)) return null;
@@ -94,7 +110,8 @@ async function registerRequestStatus({
   status,
   validation,
   extraMetadata,
-  allowTextStorage
+  allowTextStorage,
+  action
 }) {
   return registerUsage({
     userId: identity.userId,
@@ -110,6 +127,7 @@ async function registerRequestStatus({
     plan: identity.plan,
     status,
     validation,
+    action,
     allowTextStorage,
     metadata: {
       requestMetadata: metadata,
@@ -236,6 +254,120 @@ router.post("/improve-text", async (req, res, next) => {
         extraMetadata: {
           failureCode: error.code || null
         }
+      }).catch(() => null);
+    }
+
+    return next(error);
+  }
+});
+
+router.post("/translate-text", async (req, res, next) => {
+  let payload = null;
+  let metadata = null;
+  let identity = null;
+  let classification = null;
+
+  try {
+    payload = translateTextSchema.parse(req.body);
+    metadata = normalizeMetadata({
+      ...payload.metadata,
+      source: payload.metadata?.source || "incoming_message"
+    });
+    identity = getRequestIdentity(req);
+
+    if (!identity.isAuthenticated && !identity.anonymousId) {
+      return res.status(400).json({
+        error: "ANONYMOUS_ID_REQUIRED",
+        message: "Identificador anonimo ausente."
+      });
+    }
+
+    classification = classifyMessage(payload.text);
+    const usageBefore = await checkUsageLimit({
+      userId: identity.userId,
+      anonymousId: identity.anonymousId,
+      plan: identity.plan
+    });
+
+    if (usageBefore.isLimitReached) {
+      await registerRequestStatus({
+        identity,
+        payload: {
+          ...payload,
+          userPreferences: payload.userPreferences
+        },
+        metadata,
+        classification,
+        improvedText: null,
+        status: "blocked_daily_limit",
+        validation: {
+          blocked: true,
+          reason: "daily_limit_reached"
+        },
+        action: TRANSLATE_RECEIVED_ACTION,
+        extraMetadata: {
+          usageBefore: toPublicUsage(usageBefore)
+        },
+        allowTextStorage: false
+      });
+
+      return res.status(429).json({
+        error: "DAILY_LIMIT_REACHED",
+        message: "Voce atingiu o limite diario do seu plano.",
+        usage: toPublicUsage(usageBefore)
+      });
+    }
+
+    const translated = await translateText(payload.text, payload.userPreferences);
+    const registered = await registerRequestStatus({
+      identity,
+      payload: {
+        ...payload,
+        userPreferences: payload.userPreferences
+      },
+      metadata,
+      classification,
+      improvedText: translated.translatedText,
+      status: "success",
+      validation: {
+        targetLanguage: translated.targetLanguage
+      },
+      action: TRANSLATE_RECEIVED_ACTION,
+      extraMetadata: {
+        targetLanguage: translated.targetLanguage,
+        actionType: "incoming_translation"
+      },
+      allowTextStorage: payload.userPreferences.allowTextStorage === true
+    });
+
+    return res.json({
+      translatedText: translated.translatedText,
+      usage: toPublicUsage(registered.usage)
+    });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({
+        error: "INVALID_PAYLOAD",
+        message: "Payload invalido."
+      });
+    }
+
+    if (payload && identity && classification) {
+      await registerRequestStatus({
+        identity,
+        payload,
+        metadata: metadata || normalizeMetadata({ source: "incoming_message" }),
+        classification,
+        improvedText: null,
+        status: "failed",
+        validation: {
+          error: error.message || "Falha ao traduzir texto."
+        },
+        action: TRANSLATE_RECEIVED_ACTION,
+        extraMetadata: {
+          failureCode: error.code || null
+        },
+        allowTextStorage: false
       }).catch(() => null);
     }
 

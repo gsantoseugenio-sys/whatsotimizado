@@ -1,6 +1,7 @@
 import { query } from "../../db/pool.js";
 
 export const IMPROVE_TEXT_ACTION = "improve_text";
+export const TRANSLATE_RECEIVED_ACTION = "translate_received_message";
 
 const DAILY_LIMITS = {
   free: 5,
@@ -56,10 +57,30 @@ export async function countImproveTextUsageToday({ userId, anonymousId }) {
   return result.rows[0]?.total || 0;
 }
 
+export async function countAiUsageToday({ userId, anonymousId }) {
+  if (!userId && !anonymousId) return 0;
+
+  const owner = buildOwnerFilter({ userId, anonymousId });
+  const result = await query(
+    `
+    SELECT COUNT(*)::int AS total
+    FROM ai_text_improvement_requests
+    WHERE ${owner.clause}
+      AND action = ANY($2::text[])
+      AND status = 'success'
+      AND created_at >= DATE_TRUNC('day', NOW())
+      AND created_at < DATE_TRUNC('day', NOW()) + INTERVAL '1 day';
+    `,
+    [owner.ownerValue, [IMPROVE_TEXT_ACTION, TRANSLATE_RECEIVED_ACTION]]
+  );
+
+  return result.rows[0]?.total || 0;
+}
+
 export async function checkUsageLimit({ userId, anonymousId, plan }) {
   const resolvedPlan = resolveImprovePlanId(plan);
   const dailyLimit = getDailyLimitForPlan(resolvedPlan);
-  const usedToday = await countImproveTextUsageToday({ userId, anonymousId });
+  const usedToday = await countAiUsageToday({ userId, anonymousId });
   const isLimitReached = Number.isFinite(dailyLimit) ? usedToday >= dailyLimit : false;
 
   return {
