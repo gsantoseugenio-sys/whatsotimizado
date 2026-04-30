@@ -1653,3 +1653,34 @@
 .wa-ai-translation-text {
   display: block;
 }
+
+/* Right sidebar mode. Keep this at the end so older floating-panel rules cannot override it. */
+.wa-ai-panel.wa-ai-floating-panel {
+  position: fixed !important;
+  inset: 0 0 0 auto !important;
+  width: min(430px, calc(100vw - 54px));
+  max-width: calc(100vw - 54px);
+  height: 100vh;
+  max-height: 100vh;
+  border-radius: 0;
+  border-top: 0;
+  border-right: 0;
+  border-bottom: 0;
+  transform: none !important;
+  box-shadow: -14px 0 34px rgba(15, 23, 42, 0.22);
+}
+
+.wa-ai-panel.wa-ai-floating-panel .wa-ai-panel-header {
+  border-radius: 0;
+}
+
+.wa-ai-panel.wa-ai-floating-panel .wa-ai-app-shell {
+  min-height: calc(100vh - 48px);
+}
+
+@media (max-width: 520px) {
+  .wa-ai-panel.wa-ai-floating-panel {
+    width: calc(100vw - 46px);
+    max-width: calc(100vw - 46px);
+  }
+}
