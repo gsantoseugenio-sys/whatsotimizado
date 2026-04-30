@@ -1927,27 +1927,158 @@
 
   function getStickerTheme(text) {
     const normalized = normalizeForHeuristics(text);
-    const has = (words) => countMatches(normalized, words) > 0;
-    if (has(["casa", "imovel", "apartamento", "terreno", "comprar casa", "moradia"])) {
-      return { id: "house", title: "Casa dos sonhos", primary: "#10b981", secondary: "#fbbf24" };
-    }
-    if (has(["amor", "saudade", "carinho", "apaixonado", "especial", "coracao"])) {
-      return { id: "love", title: "Com carinho", primary: "#ec4899", secondary: "#f9a8d4" };
-    }
-    if (has(["comprar", "venda", "proposta", "fechar", "negociar", "preco", "valor", "oferta"])) {
-      return { id: "sales", title: "Bora fechar", primary: "#0f766e", secondary: "#f59e0b" };
-    }
-    if (has(["problema", "reclamacao", "erro", "falha", "nervoso", "irritado", "nao esta certo"])) {
-      return { id: "alert", title: "Atencao", primary: "#ef4444", secondary: "#f97316" };
-    }
-    if (has(["triste", "cansado", "dificil", "pesado", "desanimado"])) {
-      return { id: "sad", title: "Forca ai", primary: "#64748b", secondary: "#93c5fd" };
-    }
-    if (has(["feliz", "otimo", "alegria", "incrivel", "adorei", "muito bom"])) {
-      return { id: "happy", title: "Que bom", primary: "#22c55e", secondary: "#fde047" };
-    }
-    if (has(["reuniao", "contrato", "cliente", "projeto", "empresa", "estrategia", "resultado"])) {
-      return { id: "business", title: "Profissional", primary: "#2563eb", secondary: "#38bdf8" };
+    const score = (words) => countMatches(normalized, words);
+    const has = (words) => score(words) > 0;
+    const homeScore = score(["casa", "imovel", "apartamento", "terreno", "moradia", "financiamento", "chave", "corretor"]);
+    const buyScore = score(["comprar", "compra", "interesse", "quero", "gostaria", "procurando", "buscando", "visitar", "negociar"]);
+    const candidates = [
+      {
+        id: "home_purchase",
+        title: "Chave na mao",
+        primary: "#059669",
+        secondary: "#fbbf24",
+        weight: homeScore > 0 && buyScore > 0 ? homeScore * 5 + buyScore * 2 : 0
+      },
+      {
+        id: "payment",
+        title: "Conta em dia",
+        primary: "#2563eb",
+        secondary: "#86efac",
+        weight: score(["pagamento", "pagar", "boleto", "fatura", "pix", "debito", "vencido", "pendente", "cobrar", "em aberto"]) * 5
+      },
+      {
+        id: "meeting",
+        title: "Agenda marcada",
+        primary: "#7c3aed",
+        secondary: "#c4b5fd",
+        weight: score(["reuniao", "agenda", "horario", "marcar", "agendar", "call", "videochamada", "encontro"]) * 4
+      },
+      {
+        id: "delivery",
+        title: "Pedido a caminho",
+        primary: "#ea580c",
+        secondary: "#fdba74",
+        weight: score(["pedido", "entrega", "enviar", "envio", "chegou", "produto", "pacote", "rastreamento", "transportadora"]) * 4
+      },
+      {
+        id: "food",
+        title: "Hora da fome",
+        primary: "#dc2626",
+        secondary: "#fde047",
+        weight: score(["comida", "almoco", "jantar", "lanche", "pizza", "hamburguer", "restaurante", "cardapio", "delivery"]) * 4
+      },
+      {
+        id: "travel",
+        title: "Partiu viagem",
+        primary: "#0284c7",
+        secondary: "#bae6fd",
+        weight: score(["viagem", "viajar", "hotel", "passagem", "voo", "aviao", "ferias", "destino", "aeroporto"]) * 4
+      },
+      {
+        id: "study",
+        title: "Modo estudo",
+        primary: "#9333ea",
+        secondary: "#f0abfc",
+        weight: score(["estudar", "estudo", "aula", "prova", "curso", "faculdade", "livro", "aprender", "professor"]) * 4
+      },
+      {
+        id: "tech",
+        title: "Modo tech",
+        primary: "#0f766e",
+        secondary: "#67e8f9",
+        weight: score(["codigo", "programa", "sistema", "site", "app", "software", "bug", "api", "backend", "frontend"]) * 4
+      },
+      {
+        id: "support",
+        title: "Pode deixar",
+        primary: "#0891b2",
+        secondary: "#a5f3fc",
+        weight: score(["ajuda", "suporte", "duvida", "atendimento", "resolver", "orientar", "explicar"]) * 3
+      },
+      {
+        id: "apology",
+        title: "Foi mal",
+        primary: "#f97316",
+        secondary: "#fed7aa",
+        weight: score(["desculpa", "perdao", "sinto muito", "me desculpe", "erro meu"]) * 4
+      },
+      {
+        id: "thanks",
+        title: "Valeu demais",
+        primary: "#16a34a",
+        secondary: "#bbf7d0",
+        weight: score(["obrigado", "obrigada", "agradeco", "grato", "gratidao", "valeu", "agradecer"]) * 4
+      },
+      {
+        id: "job",
+        title: "Trabalho em foco",
+        primary: "#334155",
+        secondary: "#cbd5e1",
+        weight: score(["curriculo", "vaga", "emprego", "trabalho", "entrevista", "contratar", "salario", "carreira"]) * 4
+      },
+      {
+        id: "negotiation",
+        title: "Bora negociar",
+        primary: "#b45309",
+        secondary: "#fcd34d",
+        weight: score(["negociar", "negociacao", "proposta", "condicao", "desconto", "fechamento", "acordo"]) * 4
+      },
+      {
+        id: "house",
+        title: "Casa dos sonhos",
+        primary: "#10b981",
+        secondary: "#fbbf24",
+        weight: homeScore * 4
+      },
+      {
+        id: "love",
+        title: "Com carinho",
+        primary: "#ec4899",
+        secondary: "#f9a8d4",
+        weight: score(["amor", "saudade", "carinho", "apaixonado", "especial", "coracao", "beijo", "te amo"]) * 4
+      },
+      {
+        id: "alert",
+        title: "Atencao",
+        primary: "#ef4444",
+        secondary: "#f97316",
+        weight: score(["problema", "reclamacao", "erro", "falha", "nervoso", "irritado", "nao esta certo", "urgente"]) * 4
+      },
+      {
+        id: "sad",
+        title: "Forca ai",
+        primary: "#64748b",
+        secondary: "#93c5fd",
+        weight: score(["triste", "cansado", "dificil", "pesado", "desanimado", "chateado", "complicado"]) * 3
+      },
+      {
+        id: "happy",
+        title: "Que bom",
+        primary: "#22c55e",
+        secondary: "#fde047",
+        weight: score(["feliz", "otimo", "alegria", "incrivel", "adorei", "muito bom", "perfeito", "maravilha"]) * 3
+      },
+      {
+        id: "sales",
+        title: "Bora fechar",
+        primary: "#0f766e",
+        secondary: "#f59e0b",
+        weight: score(["comprar", "venda", "proposta", "fechar", "preco", "valor", "oferta", "cliente"]) * 2
+      },
+      {
+        id: "business",
+        title: "Profissional",
+        primary: "#2563eb",
+        secondary: "#38bdf8",
+        weight: score(["contrato", "cliente", "projeto", "empresa", "estrategia", "resultado", "relatorio"]) * 2
+      }
+    ];
+    const best = candidates
+      .filter((candidate) => candidate.weight > 0)
+      .sort((a, b) => b.weight - a.weight)[0];
+    if (best) return best;
+    if (has(["oi", "ola", "bom dia", "boa tarde", "boa noite", "tudo bem"])) {
+      return { id: "chat", title: "Opa!", primary: "#14b8a6", secondary: "#a7f3d0", weight: 1 };
     }
     return { id: "chat", title: "Mensagem pronta", primary: "#14b8a6", secondary: "#a7f3d0" };
   }
@@ -1955,8 +2086,21 @@
   function createComicBurst(theme) {
     const shoutByTheme = {
       house: "UAU!",
+      home_purchase: "A CHAVE!",
       love: "WOW!",
       sales: "FECHOU!",
+      payment: "PAGO!",
+      meeting: "MARCOU!",
+      delivery: "CHEGOU!",
+      food: "NHAM!",
+      travel: "PARTIU!",
+      study: "FOCO!",
+      tech: "BUGOU!",
+      support: "RESOLVO!",
+      apology: "FOI MAL!",
+      thanks: "VALEU!",
+      job: "FOCO!",
+      negotiation: "ACORDO!",
       alert: "OPA!",
       sad: "OH...",
       happy: "YEAH!",
@@ -1983,6 +2127,155 @@
       <path d="M316 416 Q360 463 410 416" fill="none" stroke="#12352d" stroke-width="17" stroke-linecap="round"/>
     `;
     const arms = `<path d="M219 377 Q170 351 139 396 M501 377 Q551 351 582 396" fill="none" stroke="#12352d" stroke-width="16" stroke-linecap="round"/>`;
+    if (theme.id === "home_purchase") {
+      return `
+        <path d="M430 230 L525 314 L525 475 H337 V314 Z" fill="#ffffff" stroke="#12352d" stroke-width="16" stroke-linejoin="round"/>
+        <path d="M316 322 L430 220 L544 322" fill="${secondary}" stroke="#12352d" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+        <rect x="407" y="388" width="48" height="87" rx="14" fill="${primary}" stroke="#12352d" stroke-width="10"/>
+        <circle cx="455" cy="433" r="6" fill="#ffffff"/>
+        <g transform="translate(-18 16) rotate(-5 278 385)">
+          <circle cx="274" cy="279" r="58" fill="#ffd7a8" stroke="#12352d" stroke-width="15"/>
+          <path d="M214 275 Q275 205 336 275" fill="${primary}" stroke="#12352d" stroke-width="13" stroke-linejoin="round"/>
+          <path d="M243 340 Q276 377 310 340" fill="none" stroke="#12352d" stroke-width="13" stroke-linecap="round"/>
+          <circle cx="254" cy="287" r="10" fill="#12352d"/>
+          <circle cx="297" cy="287" r="10" fill="#12352d"/>
+          <path d="M219 391 Q279 350 342 391 L367 505 H194 Z" fill="${primary}" stroke="#12352d" stroke-width="15" stroke-linejoin="round"/>
+          <path d="M342 393 Q402 366 438 316" fill="none" stroke="#12352d" stroke-width="16" stroke-linecap="round"/>
+          <circle cx="445" cy="306" r="22" fill="${secondary}" stroke="#12352d" stroke-width="10"/>
+          <rect x="459" y="299" width="68" height="16" rx="8" fill="${secondary}" stroke="#12352d" stroke-width="8"/>
+          <path d="M507 315 V341 M527 315 V335" stroke="#12352d" stroke-width="8" stroke-linecap="round"/>
+        </g>
+      `;
+    }
+    if (theme.id === "payment") {
+      return `
+        ${arms}
+        <g transform="rotate(-5 360 365)">
+          <rect x="228" y="220" width="264" height="300" rx="28" fill="#ffffff" stroke="#12352d" stroke-width="17"/>
+          <path d="M282 294 H438 M282 346 H416 M282 398 H382" stroke="#12352d" stroke-width="16" stroke-linecap="round"/>
+          <circle cx="443" cy="454" r="72" fill="${secondary}" stroke="#12352d" stroke-width="16"/>
+          <text x="443" y="481" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="78" font-weight="900" fill="${primary}" stroke="#ffffff" stroke-width="6" paint-order="stroke">$</text>
+          ${face}
+        </g>
+      `;
+    }
+    if (theme.id === "meeting") {
+      return `
+        ${arms}
+        <g transform="rotate(3 360 360)">
+          <rect x="224" y="240" width="272" height="236" rx="30" fill="#ffffff" stroke="#12352d" stroke-width="17"/>
+          <rect x="224" y="240" width="272" height="70" rx="28" fill="${primary}" stroke="#12352d" stroke-width="17"/>
+          <path d="M282 220 V275 M438 220 V275" stroke="#12352d" stroke-width="16" stroke-linecap="round"/>
+          <circle cx="306" cy="365" r="22" fill="${secondary}" stroke="#12352d" stroke-width="10"/>
+          <circle cx="371" cy="365" r="22" fill="${secondary}" stroke="#12352d" stroke-width="10"/>
+          <circle cx="436" cy="365" r="22" fill="${secondary}" stroke="#12352d" stroke-width="10"/>
+          <path d="M296 430 H424" stroke="${primary}" stroke-width="18" stroke-linecap="round"/>
+        </g>
+      `;
+    }
+    if (theme.id === "delivery") {
+      return `
+        <path d="M170 412 H535" stroke="#12352d" stroke-width="16" stroke-linecap="round"/>
+        <g transform="rotate(-3 360 360)">
+          <rect x="192" y="300" width="230" height="146" rx="22" fill="${secondary}" stroke="#12352d" stroke-width="17"/>
+          <path d="M422 342 H494 L544 390 V446 H422 Z" fill="${primary}" stroke="#12352d" stroke-width="17" stroke-linejoin="round"/>
+          <circle cx="264" cy="458" r="36" fill="#ffffff" stroke="#12352d" stroke-width="15"/>
+          <circle cx="480" cy="458" r="36" fill="#ffffff" stroke="#12352d" stroke-width="15"/>
+          <path d="M215 270 H330 M177 327 H252" stroke="#12352d" stroke-width="15" stroke-linecap="round"/>
+          ${face}
+        </g>
+      `;
+    }
+    if (theme.id === "food") {
+      return `
+        ${arms}
+        <ellipse cx="360" cy="450" rx="170" ry="48" fill="#ffffff" stroke="#12352d" stroke-width="16"/>
+        <path d="M245 373 Q360 260 475 373 Z" fill="${secondary}" stroke="#12352d" stroke-width="17" stroke-linejoin="round"/>
+        <path d="M253 374 H467 Q459 449 360 457 Q260 449 253 374 Z" fill="${primary}" stroke="#12352d" stroke-width="17" stroke-linejoin="round"/>
+        <circle cx="317" cy="363" r="13" fill="#12352d"/>
+        <circle cx="401" cy="363" r="13" fill="#12352d"/>
+        <path d="M322 410 Q360 438 401 410" fill="none" stroke="#ffffff" stroke-width="14" stroke-linecap="round"/>
+        <path d="M513 270 C490 344 523 380 480 456" stroke="#12352d" stroke-width="13" stroke-linecap="round"/>
+        <path d="M520 270 V361" stroke="#12352d" stroke-width="13" stroke-linecap="round"/>
+      `;
+    }
+    if (theme.id === "travel") {
+      return `
+        <path d="M167 458 Q357 523 553 454" fill="none" stroke="#12352d" stroke-width="16" stroke-linecap="round"/>
+        <g transform="rotate(-12 360 345)">
+          <path d="M161 338 L545 257 Q586 249 602 278 Q615 304 583 323 L428 394 L411 510 L355 522 L352 424 L234 469 L184 448 L276 382 L172 360 Z" fill="${secondary}" stroke="#12352d" stroke-width="17" stroke-linejoin="round"/>
+          <circle cx="424" cy="312" r="17" fill="#ffffff" stroke="#12352d" stroke-width="9"/>
+          <circle cx="481" cy="300" r="17" fill="#ffffff" stroke="#12352d" stroke-width="9"/>
+        </g>
+      `;
+    }
+    if (theme.id === "study") {
+      return `
+        ${arms}
+        <path d="M214 288 Q294 252 360 307 Q426 252 506 288 V501 Q425 465 360 520 Q295 465 214 501 Z" fill="#ffffff" stroke="#12352d" stroke-width="17" stroke-linejoin="round"/>
+        <path d="M360 307 V520 M257 337 H320 M257 384 H318 M402 337 H465 M402 384 H465" stroke="#12352d" stroke-width="13" stroke-linecap="round"/>
+        <circle cx="360" cy="263" r="48" fill="${secondary}" stroke="#12352d" stroke-width="14"/>
+        <path d="M333 260 Q360 286 389 260" fill="none" stroke="${primary}" stroke-width="12" stroke-linecap="round"/>
+      `;
+    }
+    if (theme.id === "tech") {
+      return `
+        ${arms}
+        <rect x="218" y="250" width="284" height="194" rx="24" fill="#0b1220" stroke="#12352d" stroke-width="17"/>
+        <path d="M180 468 H540 L497 520 H223 Z" fill="${secondary}" stroke="#12352d" stroke-width="17" stroke-linejoin="round"/>
+        <path d="M295 315 L252 355 L295 395 M425 315 L468 355 L425 395 M385 304 L335 408" stroke="${secondary}" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="360" cy="493" r="12" fill="#12352d"/>
+      `;
+    }
+    if (theme.id === "support") {
+      return `
+        ${arms}
+        <circle cx="360" cy="360" r="126" fill="${secondary}" stroke="#12352d" stroke-width="18"/>
+        <path d="M250 360 Q250 260 360 260 Q470 260 470 360" fill="none" stroke="#12352d" stroke-width="18" stroke-linecap="round"/>
+        <rect x="218" y="348" width="54" height="82" rx="20" fill="${primary}" stroke="#12352d" stroke-width="12"/>
+        <rect x="448" y="348" width="54" height="82" rx="20" fill="${primary}" stroke="#12352d" stroke-width="12"/>
+        <path d="M445 424 Q410 463 360 463" fill="none" stroke="#12352d" stroke-width="13" stroke-linecap="round"/>
+        ${face}
+      `;
+    }
+    if (theme.id === "apology") {
+      return `
+        ${arms}
+        <circle cx="360" cy="342" r="124" fill="${secondary}" stroke="#12352d" stroke-width="18"/>
+        <path d="M302 327 Q320 306 338 327 M382 327 Q400 306 418 327" fill="none" stroke="#12352d" stroke-width="14" stroke-linecap="round"/>
+        <path d="M318 413 Q360 386 402 413" fill="none" stroke="#12352d" stroke-width="15" stroke-linecap="round"/>
+        <rect x="265" y="455" width="190" height="68" rx="18" fill="#ffffff" stroke="#12352d" stroke-width="13"/>
+        <text x="360" y="501" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="32" font-weight="900" fill="${primary}">DESCULPA</text>
+      `;
+    }
+    if (theme.id === "thanks") {
+      return `
+        ${arms}
+        <path d="M360 210 L398 306 L502 313 L421 377 L447 480 L360 425 L273 480 L299 377 L218 313 L322 306 Z" fill="${secondary}" stroke="#12352d" stroke-width="17" stroke-linejoin="round"/>
+        <circle cx="360" cy="362" r="78" fill="#ffffff" stroke="#12352d" stroke-width="14"/>
+        <path d="M313 352 Q333 330 352 352 M368 352 Q389 330 409 352 M315 389 Q360 432 407 389" fill="none" stroke="${primary}" stroke-width="12" stroke-linecap="round"/>
+      `;
+    }
+    if (theme.id === "job") {
+      return `
+        ${arms}
+        <g transform="rotate(-2 360 360)">
+          <rect x="226" y="286" width="268" height="202" rx="28" fill="${secondary}" stroke="#12352d" stroke-width="17"/>
+          <path d="M300 286 V246 Q300 218 328 218 H392 Q420 218 420 246 V286" fill="none" stroke="#12352d" stroke-width="15"/>
+          <circle cx="330" cy="365" r="35" fill="#ffffff" stroke="#12352d" stroke-width="12"/>
+          <path d="M396 342 H458 M396 382 H446 M288 432 H443" stroke="#12352d" stroke-width="14" stroke-linecap="round"/>
+        </g>
+      `;
+    }
+    if (theme.id === "negotiation") {
+      return `
+        <path d="M226 360 Q270 312 322 357 L354 385 Q374 405 398 385 L430 357 Q482 312 526 360 Q472 448 376 456 Q280 448 226 360 Z" fill="${secondary}" stroke="#12352d" stroke-width="17" stroke-linejoin="round"/>
+        <path d="M239 354 L315 429 M482 354 L408 429" stroke="${primary}" stroke-width="18" stroke-linecap="round"/>
+        <circle cx="280" cy="330" r="38" fill="#ffffff" stroke="#12352d" stroke-width="13"/>
+        <circle cx="440" cy="330" r="38" fill="#ffffff" stroke="#12352d" stroke-width="13"/>
+        <path d="M320 506 H400" stroke="#12352d" stroke-width="16" stroke-linecap="round"/>
+      `;
+    }
     if (theme.id === "house") {
       return `
         ${arms}
@@ -2066,8 +2359,8 @@
     `;
   }
 
-  function createResponseStickerUrl(text) {
-    const theme = getStickerTheme(text);
+  function createResponseStickerUrl(text, contextText = text) {
+    const theme = getStickerTheme(contextText || text);
     const lines = wrapStickerText(text, 22, 3);
     const lineHeight = 37;
     const textNodes = lines
@@ -2105,6 +2398,17 @@
       getDraftText(panel) ||
       state.lastImproveResult?.improvedText ||
       getComposerText(state.composer || findComposer())
+    );
+  }
+
+  function getResponseStickerContextText(panel) {
+    return cleanText(
+      [
+        getResponseStickerText(panel),
+        state.lastImproveResult?.improvedText || "",
+        state.lastImproveRequest?.text || "",
+        getComposerText(state.composer || findComposer())
+      ].join(" ")
     );
   }
 
@@ -2550,7 +2854,7 @@
       focusDraftInput({ prefill: false });
       return;
     }
-    renderResponseStickerResult(panel, createResponseStickerUrl(text));
+    renderResponseStickerResult(panel, createResponseStickerUrl(text, getResponseStickerContextText(panel)));
     setToast(panel, "Figurinha da resposta gerada.");
   }
 
