@@ -919,7 +919,7 @@
 
   function setPanelLoading(panel, loading) {
     const buttons = panel?.querySelectorAll(
-      "[data-wa-ai-action], [data-wa-ai='generate'], [data-wa-ai='quick-improve'], [data-wa-ai='variations'], [data-plan-id]"
+      "[data-wa-ai-action], [data-wa-ai='generate'], [data-wa-ai='quick-improve'], [data-wa-ai='variations'], [data-wa-ai='image-response'], [data-plan-id]"
     );
     if (!buttons) return;
     buttons.forEach((button) => {
@@ -1092,6 +1092,7 @@
     const generateButtons = panel.querySelectorAll("[data-wa-ai='generate']");
     const quickButtons = panel.querySelectorAll("[data-wa-ai='quick-improve']");
     const variationsButtons = panel.querySelectorAll("[data-wa-ai='variations']");
+    const imageButtons = panel.querySelectorAll("[data-wa-ai='image-response']");
 
     const isLogged = Boolean(getEffectiveToken());
     const planMeta = getPlanMeta(isLogged ? state.session?.plan || state.settings.defaultPlan : "free");
@@ -1133,6 +1134,9 @@
     });
     variationsButtons.forEach((button) => {
       button.disabled = usageReached || state.accountLoading;
+    });
+    imageButtons.forEach((button) => {
+      button.disabled = state.accountLoading;
     });
     if (usageReached) {
       setToast(panel, "Voce atingiu o limite diario. Faca upgrade para continuar.");
@@ -1181,6 +1185,7 @@
             <div class="wa-ai-primary-row" data-wa-ai="primary-row">
               <button type="button" class="wa-ai-quick" data-wa-ai="quick-improve">Aperfeicoar</button>
               <button type="button" class="wa-ai-secondary-wide" data-wa-ai="variations">Gerar variacoes</button>
+              <button type="button" class="wa-ai-secondary-wide wa-ai-image-response" data-wa-ai="image-response">Gerar imagem da minha resposta</button>
             </div>
             <div class="wa-ai-results" data-wa-ai="results">
               <p class="wa-ai-empty">Digite uma mensagem no campo da pagina e acione o agente.</p>
@@ -1267,6 +1272,9 @@
     });
     panel.querySelector("[data-wa-ai='variations']")?.addEventListener("click", () => {
       handleGenerateVariations(panel);
+    });
+    panel.querySelector("[data-wa-ai='image-response']")?.addEventListener("click", () => {
+      handleGenerateResponseImage(panel);
     });
     panel.querySelector("[data-wa-ai='draft-input']")?.addEventListener("input", () => {
       state.panelDraftReady = false;
@@ -1860,6 +1868,106 @@
     };
   }
 
+  function escapeImageSvgText(value) {
+    return String(value || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function wrapResponseImageText(text, maxChars = 42, maxLines = 12) {
+    const words = cleanText(text).split(/\s+/).filter(Boolean);
+    const lines = [];
+    let current = "";
+    words.forEach((word) => {
+      const next = current ? `${current} ${word}` : word;
+      if (next.length <= maxChars) {
+        current = next;
+        return;
+      }
+      if (current) lines.push(current);
+      current = word;
+    });
+    if (current) lines.push(current);
+    const limited = lines.slice(0, maxLines);
+    if (lines.length > maxLines && limited.length) {
+      limited[limited.length - 1] = `${limited[limited.length - 1].replace(/[.,;:!?]+$/g, "")}...`;
+    }
+    return limited.length ? limited : ["Resposta"];
+  }
+
+  function createResponseImageUrl(text) {
+    const lines = wrapResponseImageText(text);
+    const width = 900;
+    const height = Math.max(420, Math.min(760, 210 + lines.length * 42));
+    const lineHeight = 42;
+    const startY = 168;
+    const textNodes = lines
+      .map((line, index) => {
+        return `<text x="450" y="${startY + index * lineHeight}" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="600" fill="#12352d">${escapeImageSvgText(line)}</text>`;
+      })
+      .join("");
+    const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+        <defs>
+          <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#ecfdf5"/>
+            <stop offset="1" stop-color="#ffffff"/>
+          </linearGradient>
+          <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#0f172a" flood-opacity="0.16"/>
+          </filter>
+        </defs>
+        <rect width="${width}" height="${height}" rx="34" fill="url(#bg)"/>
+        <rect x="70" y="70" width="760" height="${height - 140}" rx="28" fill="#ffffff" filter="url(#shadow)"/>
+        <circle cx="450" cy="92" r="30" fill="#10b981"/>
+        <text x="450" y="101" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="800" fill="#ffffff">AI</text>
+        ${textNodes}
+      </svg>
+    `.trim();
+    return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+  }
+
+  function getResponseImageText(panel) {
+    return cleanText(
+      getDraftText(panel) ||
+      state.lastImproveResult?.improvedText ||
+      getComposerText(state.composer || findComposer())
+    );
+  }
+
+  function renderResponseImageResult(panel, imageUrl) {
+    setPrimaryRowVisible(panel, true);
+    const results = panel.querySelector("[data-wa-ai='results']");
+    if (!results) return;
+    results.innerHTML = "";
+
+    const card = document.createElement("article");
+    card.className = "wa-ai-conversation-card wa-ai-response-image-card";
+
+    const image = document.createElement("img");
+    image.className = "wa-ai-response-image";
+    image.alt = "Imagem da resposta";
+    image.src = imageUrl;
+
+    const actions = document.createElement("div");
+    actions.className = "wa-ai-result-actions";
+
+    const openButton = document.createElement("button");
+    openButton.type = "button";
+    openButton.className = "wa-ai-mini-action";
+    openButton.textContent = "Abrir imagem";
+    openButton.addEventListener("click", () => {
+      window.open(imageUrl, "_blank", "noopener,noreferrer");
+    });
+
+    actions.appendChild(openButton);
+    card.appendChild(image);
+    card.appendChild(actions);
+    results.appendChild(card);
+  }
+
   function normalizeVariationForPanel(variation, index) {
     if (typeof variation === "string") {
       return {
@@ -2125,6 +2233,17 @@
 
   async function handleGenerateVariations(panel) {
     await runRewrite(panel, { variations: true });
+  }
+
+  function handleGenerateResponseImage(panel) {
+    const text = getResponseImageText(panel);
+    if (!text) {
+      renderError(panel, "Digite ou gere uma resposta antes de criar a imagem.");
+      focusDraftInput({ prefill: false });
+      return;
+    }
+    renderResponseImageResult(panel, createResponseImageUrl(text));
+    setToast(panel, "Imagem da resposta gerada.");
   }
 
   async function clickCurrentSendButton() {

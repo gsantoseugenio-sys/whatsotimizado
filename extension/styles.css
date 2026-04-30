@@ -1399,6 +1399,25 @@
   filter: none;
 }
 
+.wa-ai-image-response {
+  grid-column: 1 / -1;
+  min-height: 36px;
+}
+
+.wa-ai-response-image-card {
+  gap: 10px;
+}
+
+.wa-ai-response-image {
+  display: block;
+  width: 100%;
+  max-height: 360px;
+  object-fit: contain;
+  border: 1px solid #dfe5ea;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
 .wa-ai-draft-input {
   width: 100%;
   min-height: 104px;
