@@ -142,6 +142,7 @@
     history: [],
     lastImproveRequest: null,
     lastImproveResult: null,
+    lastSticker: null,
     learningSettings: {
       allowLearning: true,
       allowTextStorage: false
@@ -1951,91 +1952,148 @@
     return { id: "chat", title: "Mensagem pronta", primary: "#14b8a6", secondary: "#a7f3d0" };
   }
 
+  function createComicBurst(theme) {
+    const shoutByTheme = {
+      house: "UAU!",
+      love: "WOW!",
+      sales: "FECHOU!",
+      alert: "OPA!",
+      sad: "OH...",
+      happy: "YEAH!",
+      business: "TOP!",
+      chat: "HEY!"
+    };
+    const shout = shoutByTheme[theme.id] || "WOW!";
+    return `
+      <path d="M83 308 L156 286 L118 221 L193 239 L190 161 L250 215 L286 144 L313 222 L386 181 L360 258 L446 248 L382 303 L457 354 L369 360 L409 438 L337 392 L296 464 L279 379 L197 405 L251 340 Z" fill="${theme.secondary}" opacity="0.9" stroke="#12352d" stroke-width="10" stroke-linejoin="round"/>
+      <path d="M533 118 L557 176 L620 164 L580 214 L625 261 L562 254 L541 313 L520 254 L457 261 L502 214 L462 164 L525 176 Z" fill="#ffffff" stroke="${theme.primary}" stroke-width="10" stroke-linejoin="round"/>
+      <path d="M118 505 L162 526 M141 466 L185 494 M574 429 L628 405 M563 472 L632 474 M191 134 L232 91 M226 155 L284 130" stroke="#12352d" stroke-width="13" stroke-linecap="round"/>
+      <text x="548" y="230" text-anchor="middle" transform="rotate(-11 548 230)" font-family="Segoe UI, Arial, sans-serif" font-size="42" font-weight="900" fill="${theme.primary}" stroke="#ffffff" stroke-width="8" paint-order="stroke">${escapeStickerSvgText(shout)}</text>
+    `;
+  }
+
   function createStickerIcon(theme) {
     const primary = theme.primary;
     const secondary = theme.secondary;
+    const face = `
+      <circle cx="318" cy="354" r="18" fill="#12352d"/>
+      <circle cx="404" cy="354" r="18" fill="#12352d"/>
+      <circle cx="325" cy="346" r="6" fill="#ffffff"/>
+      <circle cx="411" cy="346" r="6" fill="#ffffff"/>
+      <path d="M316 416 Q360 463 410 416" fill="none" stroke="#12352d" stroke-width="17" stroke-linecap="round"/>
+    `;
+    const arms = `<path d="M219 377 Q170 351 139 396 M501 377 Q551 351 582 396" fill="none" stroke="#12352d" stroke-width="16" stroke-linecap="round"/>`;
     if (theme.id === "house") {
       return `
-        <path d="M230 325 L360 210 L490 325 Z" fill="${secondary}" stroke="#12352d" stroke-width="14" stroke-linejoin="round"/>
-        <rect x="255" y="325" width="210" height="165" rx="24" fill="#ffffff" stroke="#12352d" stroke-width="14"/>
-        <rect x="338" y="390" width="52" height="100" rx="16" fill="${primary}"/>
-        <circle cx="382" cy="441" r="6" fill="#ffffff"/>
+        ${arms}
+        <g transform="rotate(-4 360 358)">
+          <path d="M207 332 L360 196 L513 332 Z" fill="${secondary}" stroke="#12352d" stroke-width="18" stroke-linejoin="round"/>
+          <rect x="245" y="326" width="232" height="184" rx="30" fill="#ffffff" stroke="#12352d" stroke-width="18"/>
+          <rect x="333" y="402" width="58" height="108" rx="18" fill="${primary}" stroke="#12352d" stroke-width="10"/>
+          <circle cx="377" cy="458" r="7" fill="#ffffff"/>
+          ${face}
+        </g>
       `;
     }
     if (theme.id === "love") {
-      return `<path d="M360 496 C250 410 205 350 235 288 C258 239 320 237 360 286 C400 237 462 239 485 288 C515 350 470 410 360 496 Z" fill="${primary}" stroke="#12352d" stroke-width="14" stroke-linejoin="round"/>`;
+      return `
+        ${arms}
+        <g transform="rotate(5 360 360)">
+          <path d="M360 522 C222 416 184 345 225 279 C258 225 322 235 360 285 C398 235 462 225 495 279 C536 345 498 416 360 522 Z" fill="${primary}" stroke="#12352d" stroke-width="18" stroke-linejoin="round"/>
+          <path d="M283 280 C306 250 341 260 360 294" fill="none" stroke="#ffffff" stroke-width="16" stroke-linecap="round" opacity="0.7"/>
+          ${face}
+        </g>
+      `;
     }
     if (theme.id === "sales") {
       return `
-        <circle cx="360" cy="356" r="118" fill="${secondary}" stroke="#12352d" stroke-width="14"/>
-        <text x="360" y="391" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="96" font-weight="900" fill="#12352d">$</text>
-        <path d="M250 242 L316 176 L316 219 L470 219 L470 265 L316 265 L316 308 Z" fill="${primary}" stroke="#12352d" stroke-width="10" stroke-linejoin="round"/>
+        ${arms}
+        <g transform="rotate(-7 360 360)">
+          <path d="M211 319 L321 210 H508 V397 L395 510 L211 319 Z" fill="${secondary}" stroke="#12352d" stroke-width="18" stroke-linejoin="round"/>
+          <circle cx="456" cy="265" r="22" fill="#ffffff" stroke="#12352d" stroke-width="12"/>
+          <text x="360" y="405" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="116" font-weight="900" fill="${primary}" stroke="#ffffff" stroke-width="8" paint-order="stroke">$</text>
+          ${face}
+        </g>
       `;
     }
     if (theme.id === "alert") {
       return `
-        <circle cx="360" cy="360" r="126" fill="${secondary}" stroke="#12352d" stroke-width="14"/>
-        <path d="M292 330 L335 314 M428 330 L385 314" stroke="#12352d" stroke-width="16" stroke-linecap="round"/>
-        <circle cx="315" cy="365" r="13" fill="#12352d"/>
-        <circle cx="405" cy="365" r="13" fill="#12352d"/>
-        <path d="M318 430 Q360 400 402 430" fill="none" stroke="#12352d" stroke-width="14" stroke-linecap="round"/>
+        <path d="M225 262 L498 262 L540 508 H183 Z" fill="${secondary}" stroke="#12352d" stroke-width="18" stroke-linejoin="round"/>
+        <path d="M292 336 L337 316 M428 336 L383 316" stroke="#12352d" stroke-width="18" stroke-linecap="round"/>
+        <circle cx="316" cy="374" r="15" fill="#12352d"/>
+        <circle cx="405" cy="374" r="15" fill="#12352d"/>
+        <path d="M318 445 Q360 411 403 445" fill="none" stroke="#12352d" stroke-width="16" stroke-linecap="round"/>
+        <text x="360" y="313" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="78" font-weight="900" fill="${primary}" stroke="#ffffff" stroke-width="8" paint-order="stroke">!</text>
       `;
     }
     if (theme.id === "sad") {
       return `
-        <circle cx="360" cy="360" r="126" fill="${secondary}" stroke="#12352d" stroke-width="14"/>
-        <circle cx="315" cy="350" r="13" fill="#12352d"/>
-        <circle cx="405" cy="350" r="13" fill="#12352d"/>
-        <path d="M318 430 Q360 392 402 430" fill="none" stroke="#12352d" stroke-width="14" stroke-linecap="round"/>
-        <path d="M425 378 C452 410 424 430 409 410 C396 393 414 382 425 378 Z" fill="#60a5fa"/>
+        ${arms}
+        <circle cx="360" cy="368" r="138" fill="${secondary}" stroke="#12352d" stroke-width="18"/>
+        <circle cx="314" cy="350" r="15" fill="#12352d"/>
+        <circle cx="407" cy="350" r="15" fill="#12352d"/>
+        <path d="M315 435 Q360 394 406 435" fill="none" stroke="#12352d" stroke-width="17" stroke-linecap="round"/>
+        <path d="M426 374 C463 418 421 454 398 414 C384 389 408 376 426 374 Z" fill="#60a5fa" stroke="#12352d" stroke-width="8"/>
       `;
     }
     if (theme.id === "happy") {
       return `
-        <circle cx="360" cy="360" r="126" fill="${secondary}" stroke="#12352d" stroke-width="14"/>
-        <path d="M295 345 Q315 325 335 345 M385 345 Q405 325 425 345" fill="none" stroke="#12352d" stroke-width="14" stroke-linecap="round"/>
-        <path d="M302 402 Q360 462 418 402" fill="none" stroke="#12352d" stroke-width="16" stroke-linecap="round"/>
+        ${arms}
+        <circle cx="360" cy="368" r="138" fill="${secondary}" stroke="#12352d" stroke-width="18"/>
+        <path d="M284 342 Q315 306 344 342 M376 342 Q407 306 436 342" fill="none" stroke="#12352d" stroke-width="17" stroke-linecap="round"/>
+        <path d="M289 401 Q360 486 431 401" fill="#ffffff" stroke="#12352d" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M314 423 Q360 457 405 423" fill="none" stroke="${primary}" stroke-width="10" stroke-linecap="round"/>
       `;
     }
     if (theme.id === "business") {
       return `
-        <rect x="235" y="300" width="250" height="170" rx="28" fill="${primary}" stroke="#12352d" stroke-width="14"/>
-        <path d="M310 300 V260 Q310 236 334 236 H386 Q410 236 410 260 V300" fill="none" stroke="#12352d" stroke-width="14"/>
-        <rect x="330" y="348" width="60" height="42" rx="10" fill="#ffffff"/>
+        ${arms}
+        <g transform="rotate(4 360 365)">
+          <rect x="216" y="286" width="288" height="208" rx="34" fill="${primary}" stroke="#12352d" stroke-width="18"/>
+          <path d="M298 286 V249 Q298 222 326 222 H394 Q422 222 422 249 V286" fill="none" stroke="#12352d" stroke-width="16"/>
+          <path d="M333 314 L360 363 L388 314" fill="#ffffff" stroke="#12352d" stroke-width="12" stroke-linejoin="round"/>
+          ${face}
+        </g>
       `;
     }
     return `
-      <path d="M242 278 Q242 220 300 220 H444 Q502 220 502 278 V394 Q502 452 444 452 H356 L286 506 V452 H300 Q242 452 242 394 Z" fill="${secondary}" stroke="#12352d" stroke-width="14" stroke-linejoin="round"/>
-      <circle cx="318" cy="340" r="13" fill="#12352d"/>
-      <circle cx="372" cy="340" r="13" fill="#12352d"/>
-      <circle cx="426" cy="340" r="13" fill="#12352d"/>
+      ${arms}
+      <path d="M223 277 Q223 208 292 208 H452 Q521 208 521 277 V394 Q521 463 452 463 H366 L278 532 V463 H292 Q223 463 223 394 Z" fill="${secondary}" stroke="#12352d" stroke-width="18" stroke-linejoin="round"/>
+      <circle cx="318" cy="342" r="18" fill="#12352d"/>
+      <circle cx="372" cy="342" r="18" fill="#12352d"/>
+      <circle cx="426" cy="342" r="18" fill="#12352d"/>
+      <path d="M304 400 Q360 438 420 400" fill="none" stroke="${primary}" stroke-width="14" stroke-linecap="round"/>
     `;
   }
 
   function createResponseStickerUrl(text) {
     const theme = getStickerTheme(text);
-    const lines = wrapStickerText(text);
-    const lineHeight = 36;
+    const lines = wrapStickerText(text, 22, 3);
+    const lineHeight = 37;
     const textNodes = lines
       .map((line, index) => {
-        return `<text x="360" y="${555 + index * lineHeight}" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="800" fill="#12352d">${escapeStickerSvgText(line)}</text>`;
+        return `<text x="360" y="${557 + index * lineHeight}" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="900" fill="#12352d" stroke="#ffffff" stroke-width="7" paint-order="stroke">${escapeStickerSvgText(line.toUpperCase())}</text>`;
       })
       .join("");
     const svg = `
       <svg xmlns="http://www.w3.org/2000/svg" width="720" height="720" viewBox="0 0 720 720">
         <defs>
-          <linearGradient id="stickerBg" x1="0" y1="0" x2="1" y2="1">
+          <radialGradient id="stickerBg" cx="45%" cy="35%" r="72%">
             <stop offset="0" stop-color="#ffffff"/>
-            <stop offset="1" stop-color="#f8fafc"/>
-          </linearGradient>
+            <stop offset="0.52" stop-color="#fff7d6"/>
+            <stop offset="1" stop-color="${theme.secondary}"/>
+          </radialGradient>
           <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#0f172a" flood-opacity="0.25"/>
+            <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#0f172a" flood-opacity="0.28"/>
           </filter>
         </defs>
-        <path d="M359 42 C468 42 590 100 637 208 C684 316 666 464 582 559 C498 654 364 691 244 649 C124 607 45 488 43 361 C41 234 118 115 230 67 C270 50 314 42 359 42 Z" fill="url(#stickerBg)" stroke="#ffffff" stroke-width="24" filter="url(#shadow)"/>
-        <path d="M126 136 C260 62 437 67 565 167" fill="none" stroke="${theme.secondary}" stroke-width="20" stroke-linecap="round" opacity="0.9"/>
-        <text x="360" y="145" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="38" font-weight="900" fill="${theme.primary}" stroke="#ffffff" stroke-width="6" paint-order="stroke">${escapeStickerSvgText(theme.title)}</text>
-        ${createStickerIcon(theme)}
+        <path d="M358 40 C480 38 604 105 650 223 C695 340 661 493 560 584 C459 675 301 690 181 623 C61 556 11 399 59 267 C107 135 226 44 358 40 Z" fill="url(#stickerBg)" stroke="#ffffff" stroke-width="26" filter="url(#shadow)"/>
+        <path d="M96 266 C154 122 333 53 498 105" fill="none" stroke="${theme.primary}" stroke-width="18" stroke-linecap="round" opacity="0.42"/>
+        ${createComicBurst(theme)}
+        <text x="360" y="139" text-anchor="middle" transform="rotate(-4 360 139)" font-family="Segoe UI, Arial, sans-serif" font-size="42" font-weight="900" fill="${theme.primary}" stroke="#ffffff" stroke-width="8" paint-order="stroke">${escapeStickerSvgText(theme.title.toUpperCase())}</text>
+        <g transform="translate(0 18)">
+          ${createStickerIcon(theme)}
+        </g>
         ${textNodes}
       </svg>
     `.trim();
@@ -2050,11 +2108,133 @@
     );
   }
 
+  async function openStickerPreview(imageUrl) {
+    const response = await callBackground({
+      type: "WA_AI_OPEN_STICKER_PREVIEW",
+      imageUrl
+    });
+    if (!response?.ok) {
+      throw new Error(response?.error || "Nao consegui abrir a imagem.");
+    }
+  }
+
+  function createStickerPngBlob(imageUrl) {
+    return new Promise((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = 512;
+        canvas.height = 512;
+        const context = canvas.getContext("2d");
+        if (!context) {
+          reject(new Error("Canvas indisponivel."));
+          return;
+        }
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob((blob) => {
+          if (blob) {
+            resolve(blob);
+            return;
+          }
+          reject(new Error("Falha ao preparar PNG."));
+        }, "image/png");
+      };
+      image.onerror = () => reject(new Error("Falha ao carregar figurinha."));
+      image.src = imageUrl;
+    });
+  }
+
+  async function pasteStickerBlobIntoComposer(blob) {
+    const composer = getWritableComposer();
+    if (!composer) return false;
+    const target =
+      composer.isContentEditable
+        ? composer
+        : composer.closest?.("[contenteditable='true'], [contenteditable]:not([contenteditable='false'])") || composer;
+    const file = new File([blob], "figurinha-whatsotimizado.png", { type: "image/png" });
+    const transfer = new DataTransfer();
+    transfer.items.add(file);
+    transfer.setData("text/plain", "");
+    target.focus();
+
+    let pasteEvent;
+    try {
+      pasteEvent = new ClipboardEvent("paste", {
+        bubbles: true,
+        cancelable: true,
+        clipboardData: transfer
+      });
+      Object.defineProperty(pasteEvent, "clipboardData", { value: transfer });
+    } catch {
+      pasteEvent = new Event("paste", { bubbles: true, cancelable: true });
+      Object.defineProperty(pasteEvent, "clipboardData", { value: transfer });
+    }
+
+    target.dispatchEvent(pasteEvent);
+    await sleep(800);
+    return true;
+  }
+
+  async function copyStickerBlobToClipboard(blob) {
+    if (!navigator.clipboard?.write || !window.ClipboardItem) return false;
+    await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+    return true;
+  }
+
+  async function clickStickerPreviewSendButton() {
+    for (let attempt = 0; attempt < 28; attempt += 1) {
+      const button = findMediaSendButton();
+      const disabled = button?.disabled || button?.getAttribute("aria-disabled") === "true";
+      if (button && !disabled) {
+        button.click();
+        return true;
+      }
+      await sleep(120);
+    }
+    return false;
+  }
+
+  async function sendStickerToRecipient(panel, imageUrl) {
+    if (!isWhatsAppWeb()) {
+      renderError(panel, "O envio automatico de figurinha esta disponivel no WhatsApp Web.");
+      return;
+    }
+
+    try {
+      setToast(panel, "Preparando figurinha...");
+      const blob = await createStickerPngBlob(imageUrl);
+      const copied = await copyStickerBlobToClipboard(blob).catch(() => false);
+      const pasted = await pasteStickerBlobIntoComposer(blob);
+      if (!pasted) {
+        throw new Error("Campo de mensagem indisponivel.");
+      }
+      if (await clickStickerPreviewSendButton()) {
+        setToast(panel, "Figurinha enviada.");
+        trackLearningEvent("text_inserted", { assetType: "sticker" });
+        return;
+      }
+
+      if (copied) {
+        setToast(panel, "Figurinha copiada. Pressione Ctrl+V no WhatsApp e envie.");
+        return;
+      }
+
+      setToast(panel, "Figurinha anexada. Clique no enviar do WhatsApp para concluir.");
+    } catch {
+      renderError(panel, "Nao consegui enviar a figurinha automaticamente. Tente abrir a imagem e enviar manualmente.");
+    }
+  }
+
   function renderResponseStickerResult(panel, imageUrl) {
     setPrimaryRowVisible(panel, true);
     const results = panel.querySelector("[data-wa-ai='results']");
     if (!results) return;
     results.innerHTML = "";
+    state.lastSticker = {
+      imageUrl,
+      createdAt: Date.now()
+    };
 
     const card = document.createElement("article");
     card.className = "wa-ai-conversation-card wa-ai-response-sticker-card";
@@ -2070,11 +2250,26 @@
     const openButton = document.createElement("button");
     openButton.type = "button";
     openButton.className = "wa-ai-mini-action";
-    openButton.textContent = "Abrir figurinha";
-    openButton.addEventListener("click", () => {
-      window.open(imageUrl, "_blank", "noopener,noreferrer");
+    openButton.textContent = "Abrir imagem";
+    openButton.addEventListener("click", async () => {
+      try {
+        await openStickerPreview(imageUrl);
+      } catch {
+        setToast(panel, "Nao consegui abrir a imagem em nova aba.");
+      }
     });
 
+    const sendButton = document.createElement("button");
+    sendButton.type = "button";
+    sendButton.className = "wa-ai-use";
+    sendButton.textContent = "Enviar figurinha";
+    sendButton.addEventListener("click", async () => {
+      sendButton.disabled = true;
+      await sendStickerToRecipient(panel, imageUrl);
+      sendButton.disabled = false;
+    });
+
+    actions.appendChild(sendButton);
     actions.appendChild(openButton);
     card.appendChild(image);
     card.appendChild(actions);
@@ -2426,6 +2621,18 @@
       if (isVisible(button)) return button;
     }
     return null;
+  }
+
+  function findMediaSendButton() {
+    const buttons = Array.from(document.querySelectorAll("button [data-icon='send']"))
+      .map((icon) => icon.closest("button"))
+      .filter(isVisible);
+    return (
+      buttons.find((button) => {
+        const dialog = button.closest("[role='dialog'], [aria-modal='true'], [data-animate-modal-popup]");
+        return dialog && isVisible(dialog);
+      }) || null
+    );
   }
 
   function updateFloatingControls(composer) {

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Figurinha WhatsOtimizado</title>
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: #0f172a;
+        color: #e5e7eb;
+        font-family: "Segoe UI", Arial, sans-serif;
+      }
+
+      main {
+        width: min(720px, calc(100vw - 32px));
+        display: grid;
+        gap: 16px;
+        justify-items: center;
+      }
+
+      img {
+        width: min(560px, 92vw);
+        height: auto;
+        display: block;
+        border-radius: 24px;
+        background: transparent;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+      }
+
+      a,
+      button {
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 10px;
+        min-height: 40px;
+        padding: 0 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #10b981;
+        color: #ffffff;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 700;
+        text-decoration: none;
+      }
+
+      button.secondary {
+        background: #1f2937;
+      }
+
+      p {
+        margin: 0;
+        color: #cbd5e1;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <img id="sticker" alt="Figurinha gerada" />
+      <p id="status">Carregando figurinha...</p>
+      <div class="actions">
+        <a id="download" download="figurinha-whatsotimizado.svg">Baixar imagem</a>
+        <button id="close" type="button" class="secondary">Fechar</button>
+      </div>
+    </main>
+    <script src="sticker-preview.js"></script>
+  </body>
+</html>
