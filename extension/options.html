@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Configurar Aperfeicoar Mensagens IA</title>
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <main>
+      <h1>Configuracoes da extensao</h1>
+      <p class="hint">
+        Ajuste backend, perfil inicial e preferencias.
+        <a href="privacy-policy.html" target="_blank" rel="noopener noreferrer">Privacidade e dados</a>
+      </p>
+
+      <label>
+        URL do backend
+        <input id="apiBaseUrl" type="url" placeholder="https://api.whatsotimizado.com.br" />
+      </label>
+
+      <label>
+        Token manual de acesso (avancado, opcional)
+        <input id="manualToken" type="text" placeholder="waat_xxx" />
+      </label>
+
+      <label>
+        Plano visual padrao
+        <select id="defaultPlan">
+          <option value="free">Free</option>
+          <option value="personal">Uso Pessoal</option>
+          <option value="business">Empresarial</option>
+          <option value="premium">Uso Premium</option>
+        </select>
+      </label>
+
+      <label>
+        Acao padrao
+        <select id="defaultObjective">
+          <option value="better_text">Aperfeicoar</option>
+        </select>
+      </label>
+
+      <label>
+        Idioma padrao
+        <select id="defaultLanguage">
+          <option value="auto">Autodeclarar</option>
+          <option value="pt-BR">Portugues - Brasil</option>
+          <option value="en">Ingles</option>
+          <option value="hi">Hindi</option>
+          <option value="id">Indonesia</option>
+          <option value="es">Espanhol</option>
+        </select>
+      </label>
+
+      <label class="checkbox-line">
+        <input id="autoTranslateIncoming" type="checkbox" />
+        Traduzir automaticamente mensagens recebidas no WhatsApp Web
+      </label>
+
+      <div class="actions">
+        <button id="saveBtn" type="button">Salvar</button>
+        <button id="resetBtn" type="button" class="secondary">Resetar</button>
+      </div>
+
+      <p id="status"></p>
+    </main>
+    <script src="config.js"></script>
+    <script src="options.js"></script>
+  </body>
+</html>
