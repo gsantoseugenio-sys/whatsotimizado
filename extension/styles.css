@@ -1,23 +1,42 @@
 #wa-ai-rewriter-root {
   display: inline-flex;
   align-items: center;
-  position: absolute;
-  right: 56px;
-  bottom: 8px;
-  z-index: 9998;
+  position: fixed;
+  right: 0;
+  top: 50%;
+  bottom: auto;
+  left: auto;
+  transform: translateY(-50%);
+  z-index: 2147483646;
   margin-right: 0;
 }
 
 #wa-ai-rewriter-root.wa-ai-send-root {
   position: fixed;
-  right: auto;
+  right: 0;
+  top: 50%;
   bottom: auto;
+  left: auto;
+  transform: translateY(-50%);
 }
 
 #wa-ai-rewriter-root.wa-ai-floating-root {
   position: fixed;
-  right: auto;
+  right: 0;
+  top: 50%;
   bottom: auto;
+  left: auto;
+  transform: translateY(-50%);
+}
+
+#wa-ai-rewriter-root.wa-ai-side-dock {
+  position: fixed;
+  right: 0;
+  top: 50%;
+  bottom: auto;
+  left: auto;
+  transform: translateY(-50%);
+  z-index: 2147483646;
 }
 
 #wa-ai-rewriter-root *,
@@ -114,15 +133,17 @@
   box-shadow:
     0 18px 48px rgba(15, 23, 42, 0.24),
     0 2px 0 rgba(255, 255, 255, 0.8) inset;
-  z-index: 9999;
+  z-index: 2147483645;
   font-family: "Segoe UI", Arial, sans-serif;
   color: #18212f;
 }
 
 .wa-ai-panel.wa-ai-floating-panel {
   position: fixed;
-  right: 12px;
-  bottom: 18px;
+  right: 58px;
+  top: 50%;
+  bottom: auto;
+  transform: translateY(-50%);
 }
 
 .wa-ai-panel[hidden] {
@@ -1373,15 +1394,24 @@
 
 /* Floating icon and own writing field. */
 #wa-ai-rewriter-root {
-  z-index: 10000;
+  z-index: 2147483646;
+}
+
+#wa-ai-rewriter-root.wa-ai-side-dock {
+  right: 0;
+  top: 50%;
+  bottom: auto;
+  left: auto;
+  transform: translateY(-50%);
 }
 
 .wa-ai-button {
-  width: 42px;
-  height: 42px;
-  min-height: 42px;
+  width: 46px;
+  height: 46px;
+  min-height: 46px;
   border: 1px solid #e5e7eb;
-  border-radius: 999px;
+  border-right: 0;
+  border-radius: 999px 0 0 999px;
   background: #ffffff;
   box-shadow: 0 8px 22px rgba(15, 23, 42, 0.18);
 }
@@ -1389,14 +1419,45 @@
 .wa-ai-button:hover {
   background: #ffffff;
   filter: none;
-  transform: translateY(-1px);
+  transform: translateX(-5px) rotate(-2deg);
   box-shadow: 0 10px 26px rgba(15, 23, 42, 0.22);
+  animation: wa-ai-side-wiggle 0.42s ease-in-out;
 }
 
 .wa-ai-button .wa-ai-premium-symbol.is-button {
-  width: 29px;
-  height: 29px;
+  width: 31px;
+  height: 31px;
   filter: none;
+}
+
+@keyframes wa-ai-side-wiggle {
+  0% {
+    transform: translateX(0) rotate(0deg);
+  }
+
+  45% {
+    transform: translateX(-7px) rotate(-3deg);
+  }
+
+  100% {
+    transform: translateX(-5px) rotate(-2deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wa-ai-button:hover {
+    animation: none;
+    transform: translateX(-4px);
+  }
+}
+
+@media (max-width: 520px) {
+  .wa-ai-panel.wa-ai-floating-panel {
+    left: 8px;
+    right: 58px;
+    width: auto;
+    max-width: none;
+  }
 }
 
 .wa-ai-sticker-response {

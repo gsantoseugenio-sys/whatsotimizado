@@ -2941,31 +2941,10 @@
 
   function updateFloatingControls(composer) {
     if (!state.root) return;
-
-    if (state.root.classList.contains("wa-ai-send-root")) {
-      const sendButton = findSendButton(state.footer);
-      const targetRect = (sendButton || composer)?.getBoundingClientRect();
-      if (!targetRect) return;
-
-      const rootRect = state.root.getBoundingClientRect();
-      const rootWidth = rootRect.width || 44;
-      const rootHeight = rootRect.height || 44;
-      const top = Math.max(8, targetRect.top - rootHeight - 4);
-      const left = Math.min(
-        Math.max(8, targetRect.left + targetRect.width / 2 - rootWidth / 2),
-        window.innerWidth - rootWidth - 8
-      );
-      state.root.style.top = `${top}px`;
-      state.root.style.left = `${left}px`;
-      return;
-    }
-
-    if (!state.root.classList.contains("wa-ai-floating-root")) return;
-    const rect = composer.getBoundingClientRect();
-    const top = Math.max(8, rect.top - 44);
-    const left = Math.min(Math.max(8, rect.right - 150), window.innerWidth - 170);
-    state.root.style.top = `${top}px`;
-    state.root.style.left = `${left}px`;
+    state.root.classList.add("wa-ai-side-dock");
+    state.root.classList.remove("wa-ai-send-root", "wa-ai-floating-root");
+    state.root.style.top = "";
+    state.root.style.left = "";
   }
 
   function ensureControls(composer) {
@@ -2981,10 +2960,7 @@
       container.style.position = "relative";
     }
 
-    const sendButton = findSendButton(container);
-    const shouldAnchorAboveSend = isWhatsAppWeb() && Boolean(sendButton);
-
-    let root = container.querySelector("#wa-ai-rewriter-root");
+    let root = document.querySelector("#wa-ai-rewriter-root");
     if (!root) {
       root = document.createElement("div");
       root.id = "wa-ai-rewriter-root";
@@ -3007,27 +2983,24 @@
         await openAdjustmentPanel(state.panel);
       });
       root.appendChild(button);
-
-      if (container !== document.body && sendButton?.parentElement) {
-        sendButton.parentElement.insertAdjacentElement("beforebegin", root);
-      } else {
-        container.appendChild(root);
-      }
+      document.body.appendChild(root);
+    } else if (root.parentElement !== document.body) {
+      document.body.appendChild(root);
     }
-    root.classList.toggle("wa-ai-send-root", shouldAnchorAboveSend);
-    root.classList.toggle("wa-ai-floating-root", container === document.body && !shouldAnchorAboveSend);
-    if (!shouldAnchorAboveSend && container !== document.body) {
-      root.style.top = "";
-      root.style.left = "";
-    }
+    root.classList.add("wa-ai-side-dock");
+    root.classList.remove("wa-ai-send-root", "wa-ai-floating-root");
     state.root = root;
 
-    let panel = container.querySelector("#wa-ai-rewriter-panel");
+    let panel = document.querySelector("#wa-ai-rewriter-panel");
     if (!panel) {
       panel = createPanel();
-      if (container === document.body) panel.classList.add("wa-ai-floating-panel");
-      container.appendChild(panel);
+      panel.classList.add("wa-ai-floating-panel");
+      document.body.appendChild(panel);
+    } else if (panel.parentElement !== document.body) {
+      document.body.appendChild(panel);
+      panel.classList.add("wa-ai-floating-panel");
     }
+    panel.classList.add("wa-ai-floating-panel");
     state.panel = panel;
     updateFloatingControls(composer);
     applyAccountState(panel);
