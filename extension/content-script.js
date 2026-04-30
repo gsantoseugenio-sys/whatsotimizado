@@ -26,8 +26,8 @@
       runtimeConfig.GOOGLE_LOGIN_START_URL || `${configuredApiBase}/auth/google/start`,
     REQUEST_TIMEOUT_MS: runtimeConfig.REQUEST_TIMEOUT_MS || 20000,
     CACHE_TTL_MS: runtimeConfig.CACHE_TTL_MS || 120000,
-    DEFAULT_CONTEXT: runtimeConfig.DEFAULT_CONTEXT || "assistant",
-    DEFAULT_OBJECTIVE: runtimeConfig.DEFAULT_OBJECTIVE || "better_text",
+    DEFAULT_CONTEXT: runtimeConfig.DEFAULT_CONTEXT || "business",
+    DEFAULT_OBJECTIVE: runtimeConfig.DEFAULT_OBJECTIVE || "business_ceo",
     DEFAULT_LANGUAGE: runtimeConfig.DEFAULT_LANGUAGE || "auto",
     DEFAULT_CREATIVE_PERSONA: runtimeConfig.DEFAULT_CREATIVE_PERSONA || "poeta",
     DEFAULT_STYLES: Array.isArray(runtimeConfig.DEFAULT_STYLES)
@@ -47,7 +47,9 @@
   }
 
   const CONTEXT_OPTIONS = [
-    { id: "assistant", label: "Assistente" }
+    { id: "business", label: "Uso Empresarial" },
+    { id: "personal", label: "Uso Pessoal" },
+    { id: "recreative", label: "Uso Recreativo" }
   ];
 
   const LANGUAGE_OPTIONS = [
@@ -85,30 +87,36 @@
   const PREMIUM_SYMBOL_PATH = "assets/premium-symbol.png";
 
   const REWRITE_OPTIONS_BY_CONTEXT = {
-    assistant: []
+    business: [
+      { id: "business_ceo", label: "CEO / Empresario" },
+      { id: "business_sales_manager", label: "Gestor de vendas" },
+      { id: "business_marketing_analyst", label: "Analista de marketing" },
+      { id: "business_digital_influencer", label: "Copywriter" },
+      { id: "technical_terms", label: "Termos tecnicos" },
+      { id: "simple_language", label: "Linguagem simples" }
+    ],
+    personal: [
+      { id: "personal_loving", label: "Amoroso" },
+      { id: "personal_happy", label: "Feliz" },
+      { id: "personal_nervous", label: "Nervoso" },
+      { id: "personal_cold_calculating", label: "Frio e Calculista" },
+      { id: "personal_sad", label: "Triste" },
+      { id: "personal_confident", label: "Confiante" },
+      { id: "personal_parable_analogy", label: "Parabola / Analogia" }
+    ],
+    recreative: [
+      { id: "recreative_ancient_king", label: "Rei Antigo" },
+      { id: "recreative_existentialist", label: "Filosofo Existencialista" },
+      { id: "recreative_war_general", label: "General em Guerra" },
+      { id: "recreative_romantic_poet", label: "Poeta Romantico" }
+    ]
   };
 
   const LEGACY_OBJECTIVE_FALLBACKS = {
-    business_ceo: "better_text",
-    business_sales_manager: "better_text",
-    business_marketing_analyst: "better_text",
-    business_digital_influencer: "better_text",
-    technical_terms: "better_text",
-    simple_language: "better_text",
-    personal_loving: "better_text",
-    personal_happy: "better_text",
-    personal_nervous: "better_text",
-    personal_cold_calculating: "better_text",
-    personal_sad: "better_text",
-    personal_confident: "better_text",
-    personal_parable_analogy: "better_text",
-    recreative_ancient_king: "better_text",
-    recreative_existentialist: "better_text",
-    recreative_war_general: "better_text",
-    recreative_romantic_poet: "better_text",
-    personal_old_romantic_poet: "better_text",
-    personal_highly_polite: "better_text",
-    personal_charming: "better_text"
+    business_digital_influencer: "business_digital_influencer",
+    personal_old_romantic_poet: "recreative_romantic_poet",
+    personal_highly_polite: "personal_confident",
+    personal_charming: "personal_loving"
   };
 
   const state = {
@@ -1124,7 +1132,7 @@
       button.disabled = usageReached || state.accountLoading;
     });
     variationsButtons.forEach((button) => {
-      button.disabled = usageReached || state.accountLoading || !state.lastImproveResult?.improvedText;
+      button.disabled = usageReached || state.accountLoading;
     });
     if (usageReached) {
       setToast(panel, "Voce atingiu o limite diario. Faca upgrade para continuar.");
@@ -1170,11 +1178,23 @@
               rows="4"
               placeholder="Digite sua mensagem aqui. Enter para aperfeiçoar, Enter novamente para enviar."
             ></textarea>
+            <div class="wa-ai-primary-row" data-wa-ai="primary-row">
+              <button type="button" class="wa-ai-quick" data-wa-ai="quick-improve">Aperfeicoar</button>
+              <button type="button" class="wa-ai-secondary-wide" data-wa-ai="variations">Gerar variacoes</button>
+            </div>
             <div class="wa-ai-results" data-wa-ai="results">
               <p class="wa-ai-empty">Digite uma mensagem no campo da pagina e acione o agente.</p>
             </div>
           </section>
           <div class="wa-ai-controls">
+            <div class="wa-ai-section">
+              <div class="wa-ai-section-title">Modo de uso</div>
+              <div class="wa-ai-mode-toggle" data-wa-ai="context-options"></div>
+            </div>
+            <div class="wa-ai-section" data-wa-ai="rewrite-section">
+              <div class="wa-ai-section-title">Reescrever texto</div>
+              <div class="wa-ai-voice-grid" data-wa-ai="rewrite-options"></div>
+            </div>
             <div class="wa-ai-section">
               <div class="wa-ai-section-title">Idioma</div>
               <select class="wa-ai-select" data-wa-ai="language"></select>
@@ -1235,11 +1255,19 @@
       });
     });
 
+    renderContextOptions(panel);
+    renderRewriteOptions(panel);
     renderLanguageOptions(panel);
     renderTranslationSettings(panel);
     renderHistory(panel);
     renderLearningSettings(panel);
 
+    panel.querySelector("[data-wa-ai='quick-improve']")?.addEventListener("click", () => {
+      handleQuickImprove(panel);
+    });
+    panel.querySelector("[data-wa-ai='variations']")?.addEventListener("click", () => {
+      handleGenerateVariations(panel);
+    });
     panel.querySelector("[data-wa-ai='draft-input']")?.addEventListener("input", () => {
       state.panelDraftReady = false;
     });
@@ -1857,7 +1885,7 @@
   }
 
   function renderImproveResult(panel, { originalText, improvedText, variations = [] }) {
-    setPrimaryRowVisible(panel, false);
+    setPrimaryRowVisible(panel, true);
     const results = panel.querySelector("[data-wa-ai='results']");
     if (!results) return;
     const validation = validateImprovedText(originalText, improvedText);
@@ -1920,13 +1948,6 @@
       runRewrite(panel, { retry: true });
     });
 
-    const variationButton = document.createElement("button");
-    variationButton.type = "button";
-    variationButton.className = "wa-ai-mini-action";
-    variationButton.dataset.waAi = "variations";
-    variationButton.textContent = "Gerar variacoes";
-    variationButton.addEventListener("click", () => runRewrite(panel, { variations: true }));
-
     const cancelButton = document.createElement("button");
     cancelButton.type = "button";
     cancelButton.className = "wa-ai-mini-action";
@@ -1938,7 +1959,6 @@
 
     actions.appendChild(replaceButton);
     actions.appendChild(retryButton);
-    actions.appendChild(variationButton);
     actions.appendChild(cancelButton);
 
     const feedback = document.createElement("div");

@@ -7,31 +7,14 @@
     manualToken: "",
     defaultPlan: "free",
     favoriteStyles: ["professional"],
-    defaultObjective: "better_text",
+    defaultObjective: "business_ceo",
     defaultLanguage: "auto",
     autoTranslateIncoming: false
   };
   const LEGACY_OBJECTIVE_FALLBACKS = {
-    business_ceo: "better_text",
-    business_sales_manager: "better_text",
-    business_marketing_analyst: "better_text",
-    business_digital_influencer: "better_text",
-    technical_terms: "better_text",
-    simple_language: "better_text",
-    personal_loving: "better_text",
-    personal_happy: "better_text",
-    personal_nervous: "better_text",
-    personal_cold_calculating: "better_text",
-    personal_sad: "better_text",
-    personal_confident: "better_text",
-    personal_parable_analogy: "better_text",
-    recreative_ancient_king: "better_text",
-    recreative_existentialist: "better_text",
-    recreative_war_general: "better_text",
-    recreative_romantic_poet: "better_text",
-    personal_old_romantic_poet: "better_text",
-    personal_highly_polite: "better_text",
-    personal_charming: "better_text"
+    personal_old_romantic_poet: "recreative_romantic_poet",
+    personal_highly_polite: "personal_confident",
+    personal_charming: "personal_loving"
   };
   const LEGACY_PLACEHOLDER_HOST = ["api", ["seu", "dominio"].join("-"), "com"].join(".");
 
