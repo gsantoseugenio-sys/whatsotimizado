@@ -18,7 +18,7 @@
     DEFAULT_LANGUAGE: "auto",
     DEFAULT_CREATIVE_PERSONA: "poeta",
     DEFAULT_STYLES: ["professional"],
-    PREMIUM_PRICE_LABEL: "R$79,90",
+    PREMIUM_PRICE_LABEL: "R$49,90",
     USD_BRL_RATE: 5.02
   };
 

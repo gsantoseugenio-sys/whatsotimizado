@@ -4,7 +4,9 @@ export const IMPROVE_TEXT_ACTION = "improve_text";
 export const TRANSLATE_RECEIVED_ACTION = "translate_received_message";
 
 const DAILY_LIMITS = {
-  free: 5,
+  free: 10,
+  personal: 100,
+  business: 100,
   pro: 100,
   premium: null
 };
@@ -14,7 +16,9 @@ const PREMIUM_FAIR_USE_DAILY_SOFT_LIMIT = 1000;
 export function resolveImprovePlanId(planId) {
   const normalized = String(planId || "free").trim().toLowerCase();
   if (normalized === "premium") return "premium";
-  if (normalized === "pro" || normalized === "personal" || normalized === "business") return "pro";
+  if (normalized === "personal") return "personal";
+  if (normalized === "business") return "business";
+  if (normalized === "pro") return "pro";
   return "free";
 }
 

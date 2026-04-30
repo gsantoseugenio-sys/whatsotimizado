@@ -6,34 +6,34 @@ const PLAN_CONFIG = {
   free: {
     id: "free",
     displayName: "Gratuito",
-    monthlyRewriteLimit: 5,
+    monthlyRewriteLimit: 10,
     maxStylesPerRequest: 4,
     maxTextLength: 1200,
     priceBrlCents: 0,
     styleMonthlyLimits: {
-      professional: 5,
-      persuasive: 5,
-      emotional: 5,
-      creative: 5
+      professional: 10,
+      persuasive: 10,
+      emotional: 10,
+      creative: 10
     },
     contextMonthlyLimits: {
-      business: 5,
-      personal: 5,
-      recreative: 5,
-      quick_improve: 5
+      business: 10,
+      personal: 10,
+      recreative: 10,
+      quick_improve: 10
     },
     allowedContexts: ["business", "personal", "recreative", "quick_improve"]
   },
   personal: {
     id: "personal",
-    displayName: "Uso Pessoal",
+    displayName: "Uso Pessoal/Recreativo",
     monthlyRewriteLimit: Number.POSITIVE_INFINITY,
     maxStylesPerRequest: 8,
     maxTextLength: 4000,
     priceBrlCents: env.STRIPE_PRICE_PERSONAL_BRL_CENTS,
     styleMonthlyLimits: {},
     contextMonthlyLimits: {},
-    allowedContexts: ["personal", "quick_improve"]
+    allowedContexts: ["personal", "recreative", "quick_improve"]
   },
   business: {
     id: "business",
@@ -73,7 +73,7 @@ export function getPaidPlan(tier) {
 export function getRequiredPlanForContext(context) {
   if (context === "personal") return PLAN_CONFIG.personal;
   if (context === "business") return PLAN_CONFIG.business;
-  if (context === "recreative") return PLAN_CONFIG.premium;
+  if (context === "recreative") return PLAN_CONFIG.personal;
   return PLAN_CONFIG.premium;
 }
 

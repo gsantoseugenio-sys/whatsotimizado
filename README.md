@@ -65,10 +65,10 @@
 3. Banco real PostgreSQL (schema auto-criado no startup).
 4. Stripe completo: checkout + webhook + upgrade automatico.
 5. Controle por token:
-   plano free = 5 reescritas por dia por instalacao da extensao.
+   plano free = 10 reescritas por dia por instalacao da extensao.
    O plano free tambem funciona sem login.
 6. Planos pagos:
-   Uso pessoal R$29,90/mes, empresarial R$49,90/mes e premium R$79,90/mes.
+   Uso pessoal/recreativo R$19,90/mes, empresarial R$39,90/mes e premium R$49,90/mes.
    Usuarios fora do Brasil pagam em USD, convertido pela taxa `USD_BRL_RATE`.
 7. Limites por estilo/contexto no plano free.
 8. Cache multi-instancia com Redis (fallback em memoria).
@@ -102,9 +102,9 @@ GOOGLE_REDIRECT_URI=http://localhost:8787/auth/google/callback
 
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
-STRIPE_PRICE_PERSONAL_BRL_CENTS=2990
-STRIPE_PRICE_BUSINESS_BRL_CENTS=4990
-STRIPE_PRICE_PREMIUM_BRL_CENTS=7990
+STRIPE_PRICE_PERSONAL_BRL_CENTS=1990
+STRIPE_PRICE_BUSINESS_BRL_CENTS=3990
+STRIPE_PRICE_PREMIUM_BRL_CENTS=4990
 USD_BRL_RATE=5.02
 
 CACHE_TTL_MS=180000
@@ -153,7 +153,7 @@ stripe listen --forward-to localhost:8787/api/v1/stripe/webhook
 7. Abra WhatsApp Web e use:
    - `Reescrever com IA`
    - `Conectar Google`
-   - Escolha entre Free, Uso Pessoal, Empresarial e Uso Premium
+   - Escolha entre Free, Uso Pessoal/Recreativo, Empresarial e Uso Premium
 
 ## Tela de configuracao da extensao
 

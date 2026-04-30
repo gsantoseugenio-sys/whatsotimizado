@@ -154,7 +154,7 @@ router.post("/rewrite", async (req, res, next) => {
         error: `Limite diario do estilo "${blockedStyle.style}" atingido no plano ${plan.id}.`,
         upsell: {
           requiredPlan: "premium",
-          priceBrl: "79.90"
+          priceBrl: "49.90"
         },
         usage,
         styleUsage: styleUsageChecks
@@ -176,7 +176,7 @@ router.post("/rewrite", async (req, res, next) => {
         error: `Limite diario do contexto "${payload.context}" atingido no plano ${plan.id}.`,
         upsell: {
           requiredPlan: "premium",
-          priceBrl: "79.90"
+          priceBrl: "49.90"
         },
         usage,
         contextUsage
@@ -185,10 +185,10 @@ router.post("/rewrite", async (req, res, next) => {
 
     if (usage.isLimitReached) {
       return res.status(402).json({
-        error: "Limite do plano gratuito atingido (5 reescritas por dia).",
+        error: "Limite do plano gratuito atingido (10 reescritas por dia).",
         upsell: {
           requiredPlan: "premium",
-          priceBrl: "79.90"
+          priceBrl: "49.90"
         },
         usage
       });

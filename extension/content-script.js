@@ -34,7 +34,7 @@
       ? runtimeConfig.DEFAULT_STYLES
       : ["professional"],
     DEFAULT_AI_STYLE: runtimeConfig.DEFAULT_AI_STYLE || "natural",
-    PREMIUM_PRICE_LABEL: runtimeConfig.PREMIUM_PRICE_LABEL || "R$79,90",
+    PREMIUM_PRICE_LABEL: runtimeConfig.PREMIUM_PRICE_LABEL || "R$49,90",
     USD_BRL_RATE: Number(runtimeConfig.USD_BRL_RATE || 5.02)
   });
 
@@ -78,10 +78,10 @@
   ]);
 
   const PAYMENT_PLANS = [
-    { id: "free", label: "Free", priceLabel: "5 por dia" },
-    { id: "personal", label: "Uso Pessoal", priceBrlCents: 2990 },
-    { id: "business", label: "Empresarial", priceBrlCents: 4990 },
-    { id: "premium", label: "Uso Premium", priceBrlCents: 7990 }
+    { id: "free", label: "Free", priceLabel: "10 por dia" },
+    { id: "personal", label: "Uso Pessoal/Recreativo", priceBrlCents: 1990 },
+    { id: "business", label: "Uso Empresarial", priceBrlCents: 3990 },
+    { id: "premium", label: "Uso Premium", priceBrlCents: 4990 }
   ];
 
   const PREMIUM_SYMBOL_PATH = "assets/premium-symbol.png";
@@ -1066,7 +1066,8 @@
   function renderUsageText() {
     if (!state.usage) return "Uso: --";
     const plan = String(state.usage.plan || state.usage.planId || "free");
-    const label = plan === "premium" ? "Premium" : plan === "pro" ? "Pro" : plan === "business" ? "Pro" : plan === "personal" ? "Pro" : "Free";
+    const planMeta = getPlanMeta(plan);
+    const label = plan === "pro" ? "Pro" : planMeta.label;
     const used = Number.isFinite(state.usage.usedToday) ? state.usage.usedToday : state.usage.used;
     const limit = state.usage.dailyLimit ?? state.usage.limit;
     if (limit === null) return `${label}: ilimitado`;
