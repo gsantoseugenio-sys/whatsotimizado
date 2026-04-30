@@ -157,6 +157,9 @@
     currentPromptVariant: "A",
     currentRequestContext: CONFIG.DEFAULT_CONTEXT,
     currentRequestObjective: CONFIG.DEFAULT_OBJECTIVE,
+    sideDockTopPercent: 50,
+    sideDockDrag: null,
+    suppressDockClickUntil: 0,
     settings: {
       apiBaseUrl: CONFIG.API_BASE,
       manualToken: "",
@@ -425,6 +428,26 @@
     const generated = Array.from(random, (byte) => byte.toString(16).padStart(2, "0")).join("");
     state.anonymousId = `anon_${generated}`;
     await chrome.storage.local.set({ [storageKey]: state.anonymousId });
+  }
+
+  function clampSideDockTopPercent(value) {
+    const number = Number(value);
+    if (!Number.isFinite(number)) return 50;
+    return Math.min(88, Math.max(12, number));
+  }
+
+  async function loadSideDockPosition() {
+    const data = await chrome.storage.local.get(["wa_ai_side_dock_position"]);
+    state.sideDockTopPercent = clampSideDockTopPercent(data.wa_ai_side_dock_position?.topPercent);
+  }
+
+  async function saveSideDockPosition() {
+    await chrome.storage.local.set({
+      wa_ai_side_dock_position: {
+        topPercent: state.sideDockTopPercent,
+        updatedAt: Date.now()
+      }
+    });
   }
 
   async function loadOptions() {
@@ -2939,12 +2962,85 @@
     );
   }
 
+  function applySideDockPosition() {
+    const topPercent = clampSideDockTopPercent(state.sideDockTopPercent);
+    state.sideDockTopPercent = topPercent;
+    if (state.root) {
+      state.root.style.top = `${topPercent}%`;
+      state.root.style.left = "";
+    }
+    if (state.panel) {
+      state.panel.style.top = `${Math.min(80, Math.max(20, topPercent))}%`;
+    }
+  }
+
+  function handleSideDockPointerDown(event) {
+    if (event.button !== undefined && event.button !== 0) return;
+    const root = event.currentTarget.closest("#wa-ai-rewriter-root");
+    if (!root) return;
+    state.sideDockDrag = {
+      pointerId: event.pointerId,
+      startY: event.clientY,
+      startTopPercent: state.sideDockTopPercent,
+      moved: false
+    };
+    root.classList.add("is-dragging");
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+  }
+
+  function handleSideDockPointerMove(event) {
+    const drag = state.sideDockDrag;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    const deltaY = event.clientY - drag.startY;
+    if (Math.abs(deltaY) > 4) drag.moved = true;
+    if (!drag.moved) return;
+    event.preventDefault();
+    const viewportHeight = Math.max(window.innerHeight || 1, 1);
+    state.sideDockTopPercent = clampSideDockTopPercent(
+      drag.startTopPercent + (deltaY / viewportHeight) * 100
+    );
+    applySideDockPosition();
+  }
+
+  function finishSideDockDrag(event) {
+    const drag = state.sideDockDrag;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    state.root?.classList.remove("is-dragging");
+    event.currentTarget.releasePointerCapture?.(event.pointerId);
+    state.sideDockDrag = null;
+    if (drag.moved) {
+      state.suppressDockClickUntil = Date.now() + 350;
+      saveSideDockPosition().catch(() => null);
+    }
+  }
+
+  function bindSideDockButtonEvents(button) {
+    if (!button || button.dataset.waAiDockBound === "true") return;
+    button.dataset.waAiDockBound = "true";
+    button.addEventListener("click", async (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (Date.now() < state.suppressDockClickUntil) return;
+      showPanel();
+      focusDraftInput({ prefill: true });
+    });
+    button.addEventListener("pointerdown", handleSideDockPointerDown);
+    button.addEventListener("pointermove", handleSideDockPointerMove);
+    button.addEventListener("pointerup", finishSideDockDrag);
+    button.addEventListener("pointercancel", finishSideDockDrag);
+    button.addEventListener("contextmenu", async (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (state.sideDockDrag?.moved) return;
+      await openAdjustmentPanel(state.panel);
+    });
+  }
+
   function updateFloatingControls(composer) {
     if (!state.root) return;
     state.root.classList.add("wa-ai-side-dock");
     state.root.classList.remove("wa-ai-send-root", "wa-ai-floating-root");
-    state.root.style.top = "";
-    state.root.style.left = "";
+    applySideDockPosition();
   }
 
   function ensureControls(composer) {
@@ -2971,22 +3067,13 @@
       button.setAttribute("aria-label", "Aperfeicoar mensagem");
       button.appendChild(createPremiumSymbol("button"));
       button.title = "Clique para escrever. Enter aperfeicoa; Enter novamente envia.";
-      button.addEventListener("click", async (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        showPanel();
-        focusDraftInput({ prefill: true });
-      });
-      button.addEventListener("contextmenu", async (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        await openAdjustmentPanel(state.panel);
-      });
+      bindSideDockButtonEvents(button);
       root.appendChild(button);
       document.body.appendChild(root);
     } else if (root.parentElement !== document.body) {
       document.body.appendChild(root);
     }
+    bindSideDockButtonEvents(root.querySelector(".wa-ai-button"));
     root.classList.add("wa-ai-side-dock");
     root.classList.remove("wa-ai-send-root", "wa-ai-floating-root");
     state.root = root;
@@ -3094,6 +3181,7 @@
     await loadOptions().catch(() => {});
     await loadLearningSettings().catch(() => {});
     await loadAnonymousId().catch(() => {});
+    await loadSideDockPosition().catch(() => {});
     await loadHistory().catch(() => {});
     await loadSession();
     await syncLearningPreferences();
