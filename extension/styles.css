@@ -1399,16 +1399,16 @@
   filter: none;
 }
 
-.wa-ai-image-response {
+.wa-ai-sticker-response {
   grid-column: 1 / -1;
   min-height: 36px;
 }
 
-.wa-ai-response-image-card {
+.wa-ai-response-sticker-card {
   gap: 10px;
 }
 
-.wa-ai-response-image {
+.wa-ai-response-sticker {
   display: block;
   width: 100%;
   max-height: 360px;
@@ -1416,6 +1416,108 @@
   border: 1px solid #dfe5ea;
   border-radius: 8px;
   background: #f8fafc;
+}
+
+.wa-ai-panel.is-dark {
+  background: #0f172a;
+  border-color: #334155;
+  color: #e5e7eb;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.46);
+}
+
+.wa-ai-panel.is-dark .wa-ai-app-shell,
+.wa-ai-panel.is-dark .wa-ai-main {
+  background: #0f172a;
+}
+
+.wa-ai-panel.is-dark .wa-ai-rail {
+  background: #111827;
+  border-right-color: #334155;
+}
+
+.wa-ai-panel.is-dark .wa-ai-rail button {
+  background: #1f2937;
+  border-color: #374151;
+  color: #cbd5e1;
+}
+
+.wa-ai-panel.is-dark .wa-ai-rail button.is-active {
+  background: #0f766e;
+  border-color: #10b981;
+  color: #ffffff;
+}
+
+.wa-ai-panel.is-dark .wa-ai-section,
+.wa-ai-panel.is-dark .wa-ai-account,
+.wa-ai-panel.is-dark .wa-ai-agent-card,
+.wa-ai-panel.is-dark .wa-ai-conversation-card,
+.wa-ai-panel.is-dark .wa-ai-item,
+.wa-ai-panel.is-dark .wa-ai-history-item,
+.wa-ai-panel.is-dark .wa-ai-empty {
+  background: #111827;
+  border-color: #334155;
+  color: #e5e7eb;
+}
+
+.wa-ai-panel.is-dark .wa-ai-draft-input,
+.wa-ai-panel.is-dark .wa-ai-select,
+.wa-ai-panel.is-dark .wa-ai-message-block {
+  background: #0b1220;
+  border-color: #334155;
+  color: #e5e7eb;
+}
+
+.wa-ai-panel.is-dark .wa-ai-message-block.improved,
+.wa-ai-panel.is-dark .wa-ai-mode-card.is-active,
+.wa-ai-panel.is-dark .wa-ai-voice-chip.is-active,
+.wa-ai-panel.is-dark .wa-ai-plan-option.is-current,
+.wa-ai-panel.is-dark .wa-ai-variation-card.is-active {
+  background: #052e2b;
+  border-color: #10b981;
+  color: #d1fae5;
+}
+
+.wa-ai-panel.is-dark .wa-ai-mode-card,
+.wa-ai-panel.is-dark .wa-ai-voice-chip,
+.wa-ai-panel.is-dark .wa-ai-plan-option,
+.wa-ai-panel.is-dark .wa-ai-mini-action,
+.wa-ai-panel.is-dark .wa-ai-feedback button,
+.wa-ai-panel.is-dark .wa-ai-secondary-wide,
+.wa-ai-panel.is-dark .wa-ai-variation-card,
+.wa-ai-panel.is-dark .wa-ai-action-btn {
+  background: #1f2937;
+  border-color: #374151;
+  color: #e5e7eb;
+}
+
+.wa-ai-panel.is-dark .wa-ai-message-text,
+.wa-ai-panel.is-dark .wa-ai-account-value,
+.wa-ai-panel.is-dark .wa-ai-label,
+.wa-ai-panel.is-dark .wa-ai-variation-card span {
+  color: #f8fafc;
+}
+
+.wa-ai-panel.is-dark .wa-ai-account-label,
+.wa-ai-panel.is-dark .wa-ai-section-title,
+.wa-ai-panel.is-dark .wa-ai-message-label,
+.wa-ai-panel.is-dark .wa-ai-history-empty,
+.wa-ai-panel.is-dark .wa-ai-toggle-line,
+.wa-ai-panel.is-dark .wa-ai-toast,
+.wa-ai-panel.is-dark .wa-ai-text,
+.wa-ai-panel.is-dark .wa-ai-goal,
+.wa-ai-panel.is-dark .wa-ai-agent-status {
+  color: #cbd5e1;
+}
+
+.wa-ai-panel.is-dark .wa-ai-quick {
+  background: #3b2f14;
+  border-color: #b8860b;
+  color: #fde68a;
+}
+
+.wa-ai-panel.is-dark .wa-ai-response-sticker {
+  background: #0b1220;
+  border-color: #334155;
 }
 
 .wa-ai-draft-input {

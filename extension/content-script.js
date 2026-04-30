@@ -164,7 +164,8 @@
       defaultObjective: CONFIG.DEFAULT_OBJECTIVE,
       defaultLanguage: CONFIG.DEFAULT_LANGUAGE,
       defaultAiStyle: CONFIG.DEFAULT_AI_STYLE,
-      autoTranslateIncoming: false
+      autoTranslateIncoming: false,
+      darkMode: false
     }
   };
 
@@ -453,7 +454,8 @@
       defaultObjective: validObjective,
       defaultLanguage: validLanguage,
       defaultAiStyle: validAiStyle,
-      autoTranslateIncoming: options.autoTranslateIncoming === true
+      autoTranslateIncoming: options.autoTranslateIncoming === true,
+      darkMode: options.darkMode === true
     };
 
     state.selectedStyles = new Set(["professional"]);
@@ -472,7 +474,8 @@
         defaultObjective: state.selectedObjective,
         defaultLanguage: state.selectedLanguage,
         defaultAiStyle: state.selectedAiStyle,
-        autoTranslateIncoming: state.settings.autoTranslateIncoming === true
+        autoTranslateIncoming: state.settings.autoTranslateIncoming === true,
+        darkMode: state.settings.darkMode === true
       }
     });
   }
@@ -919,7 +922,7 @@
 
   function setPanelLoading(panel, loading) {
     const buttons = panel?.querySelectorAll(
-      "[data-wa-ai-action], [data-wa-ai='generate'], [data-wa-ai='quick-improve'], [data-wa-ai='variations'], [data-wa-ai='image-response'], [data-plan-id]"
+      "[data-wa-ai-action], [data-wa-ai='generate'], [data-wa-ai='quick-improve'], [data-wa-ai='variations'], [data-wa-ai='sticker-response'], [data-plan-id]"
     );
     if (!buttons) return;
     buttons.forEach((button) => {
@@ -990,6 +993,17 @@
   function renderTranslationSettings(panel) {
     const autoTranslate = panel?.querySelector("[data-wa-ai='auto-translate-incoming']");
     if (autoTranslate) autoTranslate.checked = state.settings.autoTranslateIncoming === true;
+  }
+
+  function applyTheme(panel = state.panel) {
+    if (!panel) return;
+    panel.classList.toggle("is-dark", state.settings.darkMode === true);
+  }
+
+  function renderThemeSettings(panel) {
+    const darkMode = panel?.querySelector("[data-wa-ai='dark-mode']");
+    if (darkMode) darkMode.checked = state.settings.darkMode === true;
+    applyTheme(panel);
   }
 
   function renderHistory(panel) {
@@ -1093,7 +1107,7 @@
     const generateButtons = panel.querySelectorAll("[data-wa-ai='generate']");
     const quickButtons = panel.querySelectorAll("[data-wa-ai='quick-improve']");
     const variationsButtons = panel.querySelectorAll("[data-wa-ai='variations']");
-    const imageButtons = panel.querySelectorAll("[data-wa-ai='image-response']");
+    const stickerButtons = panel.querySelectorAll("[data-wa-ai='sticker-response']");
 
     const isLogged = Boolean(getEffectiveToken());
     const planMeta = getPlanMeta(isLogged ? state.session?.plan || state.settings.defaultPlan : "free");
@@ -1136,7 +1150,7 @@
     variationsButtons.forEach((button) => {
       button.disabled = usageReached || state.accountLoading;
     });
-    imageButtons.forEach((button) => {
+    stickerButtons.forEach((button) => {
       button.disabled = state.accountLoading;
     });
     if (usageReached) {
@@ -1186,7 +1200,7 @@
             <div class="wa-ai-primary-row" data-wa-ai="primary-row">
               <button type="button" class="wa-ai-quick" data-wa-ai="quick-improve">Aperfeicoar</button>
               <button type="button" class="wa-ai-secondary-wide" data-wa-ai="variations">Gerar variacoes</button>
-              <button type="button" class="wa-ai-secondary-wide wa-ai-image-response" data-wa-ai="image-response">Gerar imagem da minha resposta</button>
+              <button type="button" class="wa-ai-secondary-wide wa-ai-sticker-response" data-wa-ai="sticker-response">Gerar figurinha da minha resposta</button>
             </div>
             <div class="wa-ai-results" data-wa-ai="results">
               <p class="wa-ai-empty">Digite uma mensagem no campo da pagina e acione o agente.</p>
@@ -1244,6 +1258,12 @@
               </label>
               <button type="button" class="wa-ai-link-button" data-wa-ai-action="privacy">Privacidade e dados</button>
             </div>
+            <div class="wa-ai-section wa-ai-theme-section">
+              <label class="wa-ai-toggle-line">
+                <input type="checkbox" data-wa-ai="dark-mode" />
+                <span>Modo escuro</span>
+              </label>
+            </div>
             <div class="wa-ai-toast" data-wa-ai="toast"></div>
           </div>
         </div>
@@ -1265,6 +1285,7 @@
     renderRewriteOptions(panel);
     renderLanguageOptions(panel);
     renderTranslationSettings(panel);
+    renderThemeSettings(panel);
     renderHistory(panel);
     renderLearningSettings(panel);
 
@@ -1274,8 +1295,8 @@
     panel.querySelector("[data-wa-ai='variations']")?.addEventListener("click", () => {
       handleGenerateVariations(panel);
     });
-    panel.querySelector("[data-wa-ai='image-response']")?.addEventListener("click", () => {
-      handleGenerateResponseImage(panel);
+    panel.querySelector("[data-wa-ai='sticker-response']")?.addEventListener("click", () => {
+      handleGenerateResponseSticker(panel);
     });
     panel.querySelector("[data-wa-ai='draft-input']")?.addEventListener("input", () => {
       state.panelDraftReady = false;
@@ -1298,6 +1319,11 @@
           : "Traducao automatica de recebidas desativada."
       );
       if (state.settings.autoTranslateIncoming) scheduleIncomingTranslationScan();
+    });
+    panel.querySelector("[data-wa-ai='dark-mode']")?.addEventListener("change", (event) => {
+      state.settings.darkMode = Boolean(event.target.checked);
+      renderThemeSettings(panel);
+      savePanelPreferences().catch(() => null);
     });
     panel.querySelector("[data-wa-ai='allow-learning']")?.addEventListener("change", async (event) => {
       state.learningSettings.allowLearning = Boolean(event.target.checked);
@@ -1869,7 +1895,7 @@
     };
   }
 
-  function escapeImageSvgText(value) {
+  function escapeStickerSvgText(value) {
     return String(value || "")
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
@@ -1877,7 +1903,7 @@
       .replace(/"/g, "&quot;");
   }
 
-  function wrapResponseImageText(text, maxChars = 42, maxLines = 12) {
+  function wrapStickerText(text, maxChars = 25, maxLines = 3) {
     const words = cleanText(text).split(/\s+/).filter(Boolean);
     const lines = [];
     let current = "";
@@ -1895,42 +1921,128 @@
     if (lines.length > maxLines && limited.length) {
       limited[limited.length - 1] = `${limited[limited.length - 1].replace(/[.,;:!?]+$/g, "")}...`;
     }
-    return limited.length ? limited : ["Resposta"];
+    return limited.length ? limited : ["Figurinha"];
   }
 
-  function createResponseImageUrl(text) {
-    const lines = wrapResponseImageText(text);
-    const width = 900;
-    const height = Math.max(420, Math.min(760, 210 + lines.length * 42));
-    const lineHeight = 42;
-    const startY = 168;
+  function getStickerTheme(text) {
+    const normalized = normalizeForHeuristics(text);
+    const has = (words) => countMatches(normalized, words) > 0;
+    if (has(["casa", "imovel", "apartamento", "terreno", "comprar casa", "moradia"])) {
+      return { id: "house", title: "Casa dos sonhos", primary: "#10b981", secondary: "#fbbf24" };
+    }
+    if (has(["amor", "saudade", "carinho", "apaixonado", "especial", "coracao"])) {
+      return { id: "love", title: "Com carinho", primary: "#ec4899", secondary: "#f9a8d4" };
+    }
+    if (has(["comprar", "venda", "proposta", "fechar", "negociar", "preco", "valor", "oferta"])) {
+      return { id: "sales", title: "Bora fechar", primary: "#0f766e", secondary: "#f59e0b" };
+    }
+    if (has(["problema", "reclamacao", "erro", "falha", "nervoso", "irritado", "nao esta certo"])) {
+      return { id: "alert", title: "Atencao", primary: "#ef4444", secondary: "#f97316" };
+    }
+    if (has(["triste", "cansado", "dificil", "pesado", "desanimado"])) {
+      return { id: "sad", title: "Forca ai", primary: "#64748b", secondary: "#93c5fd" };
+    }
+    if (has(["feliz", "otimo", "alegria", "incrivel", "adorei", "muito bom"])) {
+      return { id: "happy", title: "Que bom", primary: "#22c55e", secondary: "#fde047" };
+    }
+    if (has(["reuniao", "contrato", "cliente", "projeto", "empresa", "estrategia", "resultado"])) {
+      return { id: "business", title: "Profissional", primary: "#2563eb", secondary: "#38bdf8" };
+    }
+    return { id: "chat", title: "Mensagem pronta", primary: "#14b8a6", secondary: "#a7f3d0" };
+  }
+
+  function createStickerIcon(theme) {
+    const primary = theme.primary;
+    const secondary = theme.secondary;
+    if (theme.id === "house") {
+      return `
+        <path d="M230 325 L360 210 L490 325 Z" fill="${secondary}" stroke="#12352d" stroke-width="14" stroke-linejoin="round"/>
+        <rect x="255" y="325" width="210" height="165" rx="24" fill="#ffffff" stroke="#12352d" stroke-width="14"/>
+        <rect x="338" y="390" width="52" height="100" rx="16" fill="${primary}"/>
+        <circle cx="382" cy="441" r="6" fill="#ffffff"/>
+      `;
+    }
+    if (theme.id === "love") {
+      return `<path d="M360 496 C250 410 205 350 235 288 C258 239 320 237 360 286 C400 237 462 239 485 288 C515 350 470 410 360 496 Z" fill="${primary}" stroke="#12352d" stroke-width="14" stroke-linejoin="round"/>`;
+    }
+    if (theme.id === "sales") {
+      return `
+        <circle cx="360" cy="356" r="118" fill="${secondary}" stroke="#12352d" stroke-width="14"/>
+        <text x="360" y="391" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="96" font-weight="900" fill="#12352d">$</text>
+        <path d="M250 242 L316 176 L316 219 L470 219 L470 265 L316 265 L316 308 Z" fill="${primary}" stroke="#12352d" stroke-width="10" stroke-linejoin="round"/>
+      `;
+    }
+    if (theme.id === "alert") {
+      return `
+        <circle cx="360" cy="360" r="126" fill="${secondary}" stroke="#12352d" stroke-width="14"/>
+        <path d="M292 330 L335 314 M428 330 L385 314" stroke="#12352d" stroke-width="16" stroke-linecap="round"/>
+        <circle cx="315" cy="365" r="13" fill="#12352d"/>
+        <circle cx="405" cy="365" r="13" fill="#12352d"/>
+        <path d="M318 430 Q360 400 402 430" fill="none" stroke="#12352d" stroke-width="14" stroke-linecap="round"/>
+      `;
+    }
+    if (theme.id === "sad") {
+      return `
+        <circle cx="360" cy="360" r="126" fill="${secondary}" stroke="#12352d" stroke-width="14"/>
+        <circle cx="315" cy="350" r="13" fill="#12352d"/>
+        <circle cx="405" cy="350" r="13" fill="#12352d"/>
+        <path d="M318 430 Q360 392 402 430" fill="none" stroke="#12352d" stroke-width="14" stroke-linecap="round"/>
+        <path d="M425 378 C452 410 424 430 409 410 C396 393 414 382 425 378 Z" fill="#60a5fa"/>
+      `;
+    }
+    if (theme.id === "happy") {
+      return `
+        <circle cx="360" cy="360" r="126" fill="${secondary}" stroke="#12352d" stroke-width="14"/>
+        <path d="M295 345 Q315 325 335 345 M385 345 Q405 325 425 345" fill="none" stroke="#12352d" stroke-width="14" stroke-linecap="round"/>
+        <path d="M302 402 Q360 462 418 402" fill="none" stroke="#12352d" stroke-width="16" stroke-linecap="round"/>
+      `;
+    }
+    if (theme.id === "business") {
+      return `
+        <rect x="235" y="300" width="250" height="170" rx="28" fill="${primary}" stroke="#12352d" stroke-width="14"/>
+        <path d="M310 300 V260 Q310 236 334 236 H386 Q410 236 410 260 V300" fill="none" stroke="#12352d" stroke-width="14"/>
+        <rect x="330" y="348" width="60" height="42" rx="10" fill="#ffffff"/>
+      `;
+    }
+    return `
+      <path d="M242 278 Q242 220 300 220 H444 Q502 220 502 278 V394 Q502 452 444 452 H356 L286 506 V452 H300 Q242 452 242 394 Z" fill="${secondary}" stroke="#12352d" stroke-width="14" stroke-linejoin="round"/>
+      <circle cx="318" cy="340" r="13" fill="#12352d"/>
+      <circle cx="372" cy="340" r="13" fill="#12352d"/>
+      <circle cx="426" cy="340" r="13" fill="#12352d"/>
+    `;
+  }
+
+  function createResponseStickerUrl(text) {
+    const theme = getStickerTheme(text);
+    const lines = wrapStickerText(text);
+    const lineHeight = 36;
     const textNodes = lines
       .map((line, index) => {
-        return `<text x="450" y="${startY + index * lineHeight}" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="600" fill="#12352d">${escapeImageSvgText(line)}</text>`;
+        return `<text x="360" y="${555 + index * lineHeight}" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="800" fill="#12352d">${escapeStickerSvgText(line)}</text>`;
       })
       .join("");
     const svg = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+      <svg xmlns="http://www.w3.org/2000/svg" width="720" height="720" viewBox="0 0 720 720">
         <defs>
-          <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#ecfdf5"/>
-            <stop offset="1" stop-color="#ffffff"/>
+          <linearGradient id="stickerBg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#ffffff"/>
+            <stop offset="1" stop-color="#f8fafc"/>
           </linearGradient>
           <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#0f172a" flood-opacity="0.16"/>
+            <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#0f172a" flood-opacity="0.25"/>
           </filter>
         </defs>
-        <rect width="${width}" height="${height}" rx="34" fill="url(#bg)"/>
-        <rect x="70" y="70" width="760" height="${height - 140}" rx="28" fill="#ffffff" filter="url(#shadow)"/>
-        <circle cx="450" cy="92" r="30" fill="#10b981"/>
-        <text x="450" y="101" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="800" fill="#ffffff">AI</text>
+        <path d="M359 42 C468 42 590 100 637 208 C684 316 666 464 582 559 C498 654 364 691 244 649 C124 607 45 488 43 361 C41 234 118 115 230 67 C270 50 314 42 359 42 Z" fill="url(#stickerBg)" stroke="#ffffff" stroke-width="24" filter="url(#shadow)"/>
+        <path d="M126 136 C260 62 437 67 565 167" fill="none" stroke="${theme.secondary}" stroke-width="20" stroke-linecap="round" opacity="0.9"/>
+        <text x="360" y="145" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="38" font-weight="900" fill="${theme.primary}" stroke="#ffffff" stroke-width="6" paint-order="stroke">${escapeStickerSvgText(theme.title)}</text>
+        ${createStickerIcon(theme)}
         ${textNodes}
       </svg>
     `.trim();
     return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
   }
 
-  function getResponseImageText(panel) {
+  function getResponseStickerText(panel) {
     return cleanText(
       getDraftText(panel) ||
       state.lastImproveResult?.improvedText ||
@@ -1938,18 +2050,18 @@
     );
   }
 
-  function renderResponseImageResult(panel, imageUrl) {
+  function renderResponseStickerResult(panel, imageUrl) {
     setPrimaryRowVisible(panel, true);
     const results = panel.querySelector("[data-wa-ai='results']");
     if (!results) return;
     results.innerHTML = "";
 
     const card = document.createElement("article");
-    card.className = "wa-ai-conversation-card wa-ai-response-image-card";
+    card.className = "wa-ai-conversation-card wa-ai-response-sticker-card";
 
     const image = document.createElement("img");
-    image.className = "wa-ai-response-image";
-    image.alt = "Imagem da resposta";
+    image.className = "wa-ai-response-sticker";
+    image.alt = "Figurinha da resposta";
     image.src = imageUrl;
 
     const actions = document.createElement("div");
@@ -1958,7 +2070,7 @@
     const openButton = document.createElement("button");
     openButton.type = "button";
     openButton.className = "wa-ai-mini-action";
-    openButton.textContent = "Abrir imagem";
+    openButton.textContent = "Abrir figurinha";
     openButton.addEventListener("click", () => {
       window.open(imageUrl, "_blank", "noopener,noreferrer");
     });
@@ -2236,15 +2348,15 @@
     await runRewrite(panel, { variations: true });
   }
 
-  function handleGenerateResponseImage(panel) {
-    const text = getResponseImageText(panel);
+  function handleGenerateResponseSticker(panel) {
+    const text = getResponseStickerText(panel);
     if (!text) {
-      renderError(panel, "Digite ou gere uma resposta antes de criar a imagem.");
+      renderError(panel, "Digite ou gere uma resposta antes de criar a figurinha.");
       focusDraftInput({ prefill: false });
       return;
     }
-    renderResponseImageResult(panel, createResponseImageUrl(text));
-    setToast(panel, "Imagem da resposta gerada.");
+    renderResponseStickerResult(panel, createResponseStickerUrl(text));
+    setToast(panel, "Figurinha da resposta gerada.");
   }
 
   async function clickCurrentSendButton() {
@@ -2483,6 +2595,7 @@
             renderRewriteOptions(state.panel);
             renderLanguageOptions(state.panel);
             renderTranslationSettings(state.panel);
+            renderThemeSettings(state.panel);
             applyAccountState(state.panel);
           }
           scheduleIncomingTranslationScan();

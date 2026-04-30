@@ -9,7 +9,8 @@
     favoriteStyles: ["professional"],
     defaultObjective: "business_ceo",
     defaultLanguage: "auto",
-    autoTranslateIncoming: false
+    autoTranslateIncoming: false,
+    darkMode: false
   };
   const LEGACY_OBJECTIVE_FALLBACKS = {
     personal_old_romantic_poet: "recreative_romantic_poet",
@@ -25,6 +26,7 @@
     defaultObjective: document.getElementById("defaultObjective"),
     defaultLanguage: document.getElementById("defaultLanguage"),
     autoTranslateIncoming: document.getElementById("autoTranslateIncoming"),
+    darkMode: document.getElementById("darkMode"),
     saveBtn: document.getElementById("saveBtn"),
     resetBtn: document.getElementById("resetBtn"),
     status: document.getElementById("status")
@@ -82,6 +84,7 @@
       ? options.defaultLanguage
       : DEFAULT_OPTIONS.defaultLanguage;
     nodes.autoTranslateIncoming.checked = options.autoTranslateIncoming === true;
+    nodes.darkMode.checked = options.darkMode === true;
     setSelectedStyles(options.favoriteStyles);
   }
 
@@ -93,7 +96,8 @@
       favoriteStyles: ["professional"],
       defaultObjective: nodes.defaultObjective.value,
       defaultLanguage: nodes.defaultLanguage.value,
-      autoTranslateIncoming: nodes.autoTranslateIncoming.checked
+      autoTranslateIncoming: nodes.autoTranslateIncoming.checked,
+      darkMode: nodes.darkMode.checked
     };
 
     await chrome.storage.sync.set({
