@@ -90,7 +90,7 @@
     business: [
       { id: "business_ceo", label: "CEO / Empresario" },
       { id: "business_sales_manager", label: "Gestor de vendas" },
-      { id: "business_marketing_analyst", label: "Analista de marketing" },
+      { id: "business_marketing_analyst", label: "Linguagem formal" },
       { id: "business_digital_influencer", label: "Copywriter" },
       { id: "technical_terms", label: "Termos tecnicos" },
       { id: "simple_language", label: "Linguagem simples" }

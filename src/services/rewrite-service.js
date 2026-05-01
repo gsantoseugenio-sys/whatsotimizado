@@ -50,9 +50,9 @@ const OBJECTIVE_META = {
       "Converter, negociar e conduzir o cliente para decisao. Use linguagem pratica, direta e comercial, com foco em proposta, fechamento, negociacao, condicao, oferta, oportunidade, alinhamento e confirmacao."
   },
   business_marketing_analyst: {
-    label: "Analista de marketing",
+    label: "Linguagem formal",
     strategy:
-      "Comunicar com foco em estrategia de marketing. Use linguagem analitica e estruturada, com foco em publico-alvo, conversao, engajamento, posicionamento, campanha, funil, metricas e performance."
+      "Reescrever em linguagem altamente formal, refinada e elegante. Utilize vocabulario culto, preciso e sofisticado, estrutura gramatical impecavel e tom protocolar/profissional, preservando integralmente o sentido original sem inventar informacoes nem alongar excessivamente."
   },
   business_digital_influencer: {
     label: "Copywriter",

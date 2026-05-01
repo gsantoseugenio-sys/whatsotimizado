@@ -138,29 +138,28 @@ const OBJECTIVE_STYLE_GUIDES = {
     tone: "direto, confiante e executivo"
   },
   business_marketing_analyst: {
-    label: "Analista de Marketing",
-    objective: "Analisar, estruturar e comunicar com foco em estrategia de marketing.",
+    label: "Linguagem formal",
+    objective: "Elevar o texto para uma linguagem altamente formal, refinada e culta.",
     characteristics: [
-      "Linguagem analitica e estruturada.",
-      "Use conceitos de marketing sem exagerar.",
-      "Foque em publico, posicionamento e desempenho.",
-      "Pode deixar o raciocinio implicito de forma leve.",
-      "Mantenha clareza e leitura facil."
+      "Use vocabulario culto, preciso, elegante e sofisticado.",
+      "Construa frases com alto padrao gramatical e tom protocolar/profissional.",
+      "Evite coloquialismos, girias, exageros emocionais e simplificacoes excessivas.",
+      "Preserve integralmente o sentido original sem inventar informacoes.",
+      "Nao alongue excessivamente; refine sem transformar em texto artificial."
     ],
     vocabulary: [
-      "publico-alvo",
-      "conversao",
-      "engajamento",
-      "posicionamento",
-      "campanha",
-      "estrategia",
-      "funil",
-      "aquisicao",
-      "retencao",
-      "metricas",
-      "performance"
+      "prezado",
+      "cordialmente",
+      "solicito",
+      "considero",
+      "pertinente",
+      "oportuno",
+      "notavel",
+      "imprescindivel",
+      "criterioso",
+      "respeitosamente"
     ],
-    tone: "analitico, estrategico e levemente explicativo"
+    tone: "formal, culto e refinado"
   },
   business_digital_influencer: {
     label: "Copywriter",
