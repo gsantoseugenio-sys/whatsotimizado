@@ -12,6 +12,7 @@ import billingApiRouter from "./routes/billing-api.js";
 import billingPagesRouter from "./routes/billing-pages.js";
 import env from "./config/env.js";
 import learningRouter from "./routes/learning.routes.js";
+import publicPagesRouter from "./routes/public-pages.js";
 import rewriteRouter from "./routes/rewrite.js";
 import stripeWebhookRouter from "./routes/stripe-webhook.js";
 import telemetryRouter from "./routes/telemetry.js";
@@ -72,6 +73,8 @@ app.get("/health", (_req, res) => {
     uptime: process.uptime()
   });
 });
+
+app.use(publicPagesRouter);
 
 app.use("/api/v1/stripe", express.raw({ type: "application/json" }), stripeWebhookRouter);
 app.use(express.json({ limit: "1mb" }));
